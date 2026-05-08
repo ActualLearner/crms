@@ -1,0 +1,37 @@
+:root {
+	--font-sans: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+	--bg-page: hsl(0 0% 93%);
+	--surface: hsl(0 0% 96%);
+	--surface-elevated: hsl(0 0% 98%);
+	--text-primary: hsl(220 8% 8%);
+	--text-secondary: hsl(220 5% 42%);
+	--text-muted: hsl(220 5% 55%);
+	--border-subtle: hsl(220 8% 84%);
+	--border-strong: hsl(220 10% 76%);
+
+	--brand-dark: hsl(220 10% 8%);
+	--brand-light: hsl(45 14% 96%);
+
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 20px;
+	--space-6: 24px;
+	--space-8: 32px;
+	--space-10: 40px;
+
+	--radius-sm: 8px;
+	--radius-md: 12px;
+	--radius-lg: 16px;
+	--radius-xl: 20px;
+
+	--bp-sm: 640px;
+	--bp-md: 768px;
+	--bp-lg: 1024px;
+
+	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+	--duration-fast: 180ms;
+	--duration-base: 240ms;
+}

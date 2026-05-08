@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Booking Confirmed</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+  <link rel="stylesheet" href="../../assets/css/animations.css" />
+  <link rel="stylesheet" href="../../assets/css/layout.css" />
+
+</head>
+<body>
+  <div class="confirmation-shell">
+    <header class="detail-topbar">
+      <a class="app-brand" href="./vehicles.html" aria-label="Back to vehicles">
+        <span class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"></path>
+            <path d="m12 19-7-7 7-7"></path>
+          </svg>
+        </span>
+        <span class="brand-text"><span>AUTO</span><span>ULTIMATE</span></span>
+      </a>
+      <nav class="detail-nav" aria-label="Customer pages">
+        <a href="./vehicles.html">Vehicles</a>
+        <a class="active" href="./bookings.html">Bookings</a>
+        <a href="./favourites.html">Favourites</a>
+        <a href="./profile.html">Profile</a>
+      </nav>
+      <button class="avatar-button" type="button" data-logout aria-label="Logout">JD</button>
+    </header>
+
+    <main class="confirmation-page">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="./vehicles.html">Vehicles</a>
+        <span>›</span>
+        <a data-car-link href="./vehicles.html">Vehicle</a>
+        <span>›</span>
+        <span>Booking confirmed</span>
+      </nav>
+
+      <section class="confirmation-hero">
+        <div class="success-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5"></path>
+          </svg>
+        </div>
+        <h1>Booking confirmed!</h1>
+        <p data-hero-copy>Your booking is pending admin confirmation. You'll be notified shortly.</p>
+        <button class="reference-pill" type="button" data-copy-reference>
+          <span>REF.</span>
+          <strong data-reference>Loading...</strong>
+          <i aria-hidden="true"></i>
+        </button>
+      </section>
+
+      <section class="notice-card">
+        <span aria-hidden="true"></span>
+        <p><strong>Pending admin confirmation</strong> — We'll review your booking and send a confirmation email to <span data-user-email>your email</span> within 1–2 hours.</p>
+      </section>
+
+      <section class="summary-card vehicle-summary">
+        <div class="summary-card-head">
+          <h2>Vehicle</h2>
+          <span class="status-pill inline" data-status>Pending</span>
+        </div>
+        <div class="confirmed-vehicle">
+          <div class="confirmed-vehicle-media" data-vehicle-media></div>
+          <div>
+            <h3 data-car-name>Loading vehicle...</h3>
+            <p data-car-meta></p>
+            <div class="tag-row">
+              <span data-category>Vehicle</span>
+              <span data-transmission>Auto</span>
+              <span data-seats>5 seats</span>
+              <span data-power>250 hp</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-card">
+        <div class="summary-card-head">
+          <h2>Booking details</h2>
+        </div>
+        <div class="details-grid">
+          <div>
+            <span>Pick-up date</span>
+            <strong data-start-date>--</strong>
+            <p>10:00 AM</p>
+          </div>
+          <div>
+            <span>Return date</span>
+            <strong data-end-date>--</strong>
+            <p>10:00 AM</p>
+          </div>
+          <div>
+            <span>Duration</span>
+            <strong data-duration>--</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-card">
+        <div class="summary-card-head">
+          <h2>Price summary</h2>
+        </div>
+        <div class="price-lines">
+          <div><span data-rate-line>Rate</span><strong data-base-total>$0.00</strong></div>
+          <div><span>Basic insurance</span><strong>Included</strong></div>
+          <div><span>Penalty rate</span><strong data-penalty-rate>$0.00 / late day</strong></div>
+          <div class="discount-line" data-discount-line hidden><span>Discount</span><strong data-discount>$0.00</strong></div>
+          <div class="total-line"><span>Total</span><strong data-final-total>$0.00</strong></div>
+        </div>
+      </section>
+
+      <section class="summary-card includes-confirmed">
+        <div class="summary-card-head">
+          <h2>Rental includes</h2>
+        </div>
+        <ul>
+          <li>Basic insurance coverage</li>
+          <li>Unlimited mileage</li>
+          <li>24/7 roadside assistance</li>
+          <li>Free cancellation while pending</li>
+        </ul>
+      </section>
+
+      <div class="confirmation-actions">
+        <a class="btn-secondary" href="./bookings.html">View my bookings</a>
+        <a class="btn-quiet" href="./vehicles.html">Browse more cars</a>
+      </div>
+      <p class="confirmation-note">You won't be charged until admin confirms your booking.</p>
+    </main>
+  </div>
+
+  <script src="../../assets/js/api.js" defer></script>
+  <script src="../../assets/js/state.js" defer></script>
+  <script src="../../assets/js/utils.js" defer></script>
+  <script src="../../js/pages/booking-confirmed.js" defer></script>
+</body>
+</html>

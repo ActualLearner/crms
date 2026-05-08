@@ -1,7 +1,7 @@
 # Miniframe
 
 > A minimal, dependency-free PHP micro-framework built for the CRMS Car Rental API.  
-> Pure PHP 8.1+ · No Composer · No third-party libraries · SQLite or MySQL
+> Pure PHP 8.1+ · No Composer · No third-party libraries · MySQL
 
 ---
 
@@ -109,8 +109,8 @@ crms-api/
 │   └── routes.php               ← All route definitions
 │
 └── database/
-    ├── schema.php               ← Auto-creates SQLite tables on boot
-    └── crms.sql                 ← MySQL schema for production
+    ├── schema.php               ← Auto-creates MySQL tables on boot
+    └── crms.sql                 ← MySQL schema reference
 ```
 
 ---
@@ -121,15 +121,15 @@ crms-api/
 
 - PHP 8.1 or higher
 - Apache with `mod_rewrite` enabled
-- PHP extensions: `pdo_sqlite` or `pdo_mysql`, `mbstring`
-- SQLite (local dev) or MySQL (production)
+- PHP extensions: `pdo_mysql`, `mbstring`
+- MySQL 8+
 
 ### Local Setup on Ubuntu
 
 ```bash
 # Install Apache and PHP
 sudo apt update
-sudo apt install apache2 php php-sqlite3 php-mbstring php-xml -y
+sudo apt install apache2 php php-mysql php-mbstring php-xml -y
 
 # Enable mod_rewrite
 sudo a2enmod rewrite
@@ -169,16 +169,11 @@ All configuration lives in the `.env` file in the project root.
 APP_ENV=development
 ALLOWED_ORIGIN=http://localhost:5500
 
-# SQLite (local development)
-DB_DRIVER=sqlite
-DB_PATH=database/crms.sqlite
-
-# MySQL (production — swap the lines above for these)
-# DB_DRIVER=mysql
-# DB_HOST=localhost
-# DB_NAME=crms
-# DB_USER=crms_user
-# DB_PASS=your_password_here
+DB_DRIVER=mysql
+DB_HOST=localhost
+DB_NAME=crms
+DB_USER=root
+DB_PASS=
 
 RATE_LIMIT=5
 ANTHROPIC_API_KEY=your_key_here
@@ -191,13 +186,12 @@ $env    = env('APP_ENV');                   // 'development'
 $origin = env('ALLOWED_ORIGIN', 'http://localhost:5500'); // with fallback
 ```
 
-### Switching to MySQL for production
+### MySQL setup
 
-1. Comment out the SQLite lines
-2. Uncomment the MySQL lines
-3. Fill in your credentials
-4. Run `mysql -u root -p crms < database/crms.sql`
-5. Done — no code changes needed
+1. Create database and user in MySQL
+2. Fill in `.env` credentials
+3. Start the app (tables auto-create on first request)
+4. Optional: run `mysql -u root -p crms < database/crms.sql` for manual initialization
 
 > **Never commit `.env` to Git.** It contains credentials.  
 > Commit `.env.example` instead and let teammates fill in their own values.
@@ -543,7 +537,7 @@ DB::table('cars')
     ->first();
 ```
 
-> **Note:** `lockForUpdate()` only applies in MySQL. In SQLite it is silently ignored — SQLite handles concurrency differently at the file level.
+> `lockForUpdate()` uses MySQL row locking (`FOR UPDATE`) to prevent race conditions.
 
 ### Real-World Example
 
@@ -853,7 +847,7 @@ Global functions available everywhere in the application.
 Read a value from the `.env` file. Caches on first call so the file is only read once per request.
 
 ```php
-$driver  = env('DB_DRIVER', 'sqlite');
+$driver  = env('DB_DRIVER', 'mysql');
 $apiKey  = env('ANTHROPIC_API_KEY');
 $appEnv  = env('APP_ENV', 'production');
 ```
@@ -1163,7 +1157,7 @@ Every sensitive route has a middleware guard. Controllers never trust `$_GET` or
 ### Local (Ubuntu + Apache)
 
 ```bash
-sudo apt install apache2 php php-sqlite3 php-mbstring -y
+sudo apt install apache2 php php-mysql php-mbstring -y
 sudo a2enmod rewrite
 sudo sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 sudo systemctl restart apache2
