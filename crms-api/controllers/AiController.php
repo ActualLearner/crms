@@ -47,7 +47,7 @@ Keep your response conversational and helpful, under 200 words.
 Available fleet:
 {$catalog}";
 
-        $reply = $this->callClaude($system, [['role' => 'user', 'content' => $prompt]]);
+        $reply = $this->callGemini($system, [['role' => 'user', 'content' => $prompt]]);
         $this->success(['reply' => $reply]);
     }
 
@@ -79,7 +79,7 @@ Do not invent prices or policies. If unsure, say so honestly.";
         }
         $messages[] = ['role' => 'user', 'content' => $message];
 
-        $reply = $this->callClaude($system, $messages);
+        $reply = $this->callGemini($system, $messages);
         $this->success(['reply' => $reply]);
     }
 
@@ -117,27 +117,44 @@ Keep a neutral, factual tone. Do not use bullet points.";
             'content' => "Summarise these reviews for the {$car['brand']} {$car['model']}:\n\n{$reviewText}",
         ]];
 
-        $summary = $this->callClaude($system, $messages);
+        $summary = $this->callGemini($system, $messages);
         $this->success(['summary' => $summary]);
     }
 
-    // ── Private: call Claude API via cURL ────────────────────────────────
+    // ── Private: call Gemini API via cURL ────────────────────────────────
 
-    private function callClaude(string $system, array $messages): string
+    private function callGemini(string $system, array $messages): string
     {
-        $apiKey = env('ANTHROPIC_API_KEY', '');
+        $apiKey = env('GEMINI_API_KEY', '');
         if (empty($apiKey) || $apiKey === 'your_key_here') {
-            return 'AI assistant is not configured yet. Please set ANTHROPIC_API_KEY in your .env file.';
+            return 'AI assistant is not configured yet. Please set GEMINI_API_KEY in your .env file.';
+        }
+
+        $contents = [];
+        foreach ($messages as $message) {
+            $role = $message['role'] === 'assistant' ? 'model' : 'user';
+            $contents[] = [
+                'role'  => $role,
+                'parts' => [[
+                    'text' => (string) $message['content'],
+                ]],
+            ];
         }
 
         $payload = json_encode([
-            'model'      => 'claude-sonnet-4-5',
-            'max_tokens' => 512,
-            'system'     => $system,
-            'messages'   => $messages,
+            'systemInstruction' => [
+                'parts' => [[
+                    'text' => $system,
+                ]],
+            ],
+            'contents' => $contents,
+            'generationConfig' => [
+                'temperature'     => 0.5,
+                'maxOutputTokens'  => 512,
+            ],
         ]);
 
-        $ch = curl_init('https://api.anthropic.com/v1/messages');
+        $ch = curl_init('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent');
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
@@ -145,8 +162,7 @@ Keep a neutral, factual tone. Do not use bullet points.";
             CURLOPT_TIMEOUT        => 30,
             CURLOPT_HTTPHEADER     => [
                 'Content-Type: application/json',
-                'x-api-key: ' . $apiKey,
-                'anthropic-version: 2023-06-01',
+                'x-goog-api-key: ' . $apiKey,
             ],
         ]);
 
@@ -159,6 +175,6 @@ Keep a neutral, factual tone. Do not use bullet points.";
         }
 
         $data = json_decode($response, true);
-        return $data['content'][0]['text'] ?? 'Sorry, I could not generate a response.';
+        return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Sorry, I could not generate a response.';
     }
 }

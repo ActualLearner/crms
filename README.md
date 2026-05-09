@@ -54,7 +54,7 @@
 | Transactions | `DB::beginTransaction()`, `commit()`, `rollback()` |
 | Environment Config | `.env` file via `env()` helper |
 | Error Handling | Global exception handler — always returns JSON |
-| AI Integration | Claude API via cURL — no SDK needed |
+| AI Integration | Gemini API via cURL — no SDK needed |
 
 ---
 
@@ -181,7 +181,7 @@ DB_PATH=database/crms.sqlite
 # DB_PASS=your_password_here
 
 RATE_LIMIT=5
-ANTHROPIC_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
 ```
 
 ### Reading config in code
@@ -1010,19 +1010,19 @@ HTTP Status: `429 Too Many Requests`
 
 ## 17. AI Integration
 
-Miniframe includes a built-in AI controller powered by the Anthropic Claude API. It uses PHP's native `cURL` — no SDK or Composer package needed.
+Miniframe includes a built-in AI controller powered by the Gemini API. It uses PHP's native `cURL` — no SDK or Composer package needed.
 
 ### Configuration
 
 ```env
-ANTHROPIC_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
 ```
 
 ### Available Endpoints
 
 #### `POST /ai/recommend` — Smart Car Recommender
 
-Reads the live car catalog from the database and asks Claude to recommend the best matches for the customer's natural language request.
+Reads the live car catalog from the database and asks Gemini to recommend the best matches for the customer's natural language request.
 
 ```javascript
 const res = await api('/ai/recommend', {
@@ -1065,20 +1065,24 @@ console.log(res.data.summary);
 //  and smooth ride. A few reviewers noted the AC could be stronger on hot days."
 ```
 
-### How Claude is Called
+### How Gemini is Called
 
 ```php
 // Inside AiController
-private function callClaude(string $system, array $messages): string
+private function callGemini(string $system, array $messages): string
 {
     $payload = json_encode([
-        'model'    => 'claude-sonnet-4-5',
-        'max_tokens' => 512,
-        'system'   => $system,
-        'messages' => $messages,
+        'systemInstruction' => [
+            'parts' => [[ 'text' => $system ]],
+        ],
+        'contents' => $messages,
+        'generationConfig' => [
+            'temperature' => 0.5,
+            'maxOutputTokens' => 512,
+        ],
     ]);
 
-    $ch = curl_init('https://api.anthropic.com/v1/messages');
+    $ch = curl_init('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent');
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
@@ -1086,8 +1090,7 @@ private function callClaude(string $system, array $messages): string
         CURLOPT_TIMEOUT        => 30,
         CURLOPT_HTTPHEADER     => [
             'Content-Type: application/json',
-            'x-api-key: ' . env('ANTHROPIC_API_KEY'),
-            'anthropic-version: 2023-06-01',
+            'x-goog-api-key: ' . env('GEMINI_API_KEY'),
         ],
     ]);
 
@@ -1095,7 +1098,7 @@ private function callClaude(string $system, array $messages): string
     curl_close($ch);
 
     $data = json_decode($response, true);
-    return $data['content'][0]['text'];
+    return $data['candidates'][0]['content']['parts'][0]['text'];
 }
 ```
 

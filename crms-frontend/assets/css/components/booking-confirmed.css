@@ -1,0 +1,323 @@
+.confirmation-shell {
+	min-height: 100vh;
+	background: hsl(0 0% 93%);
+}
+
+.confirmation-page {
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: var(--space-5) var(--space-8) var(--space-10);
+}
+
+.confirmation-hero {
+	padding: var(--space-10) 0 var(--space-8);
+	display: grid;
+	place-items: center;
+	text-align: center;
+	gap: var(--space-3);
+}
+
+.success-mark {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	background: var(--brand-dark);
+	color: var(--brand-light);
+	display: grid;
+	place-items: center;
+}
+
+.success-mark svg {
+	width: 36px;
+	height: 36px;
+}
+
+.confirmation-hero h1 {
+	font-size: 36px;
+	line-height: 1.1;
+	letter-spacing: 0;
+}
+
+.confirmation-hero p {
+	color: var(--text-muted);
+}
+
+.reference-pill {
+	margin-top: var(--space-2);
+	min-width: 312px;
+	height: 56px;
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-sm);
+	background: var(--surface-elevated);
+	color: var(--text-primary);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-3);
+	cursor: pointer;
+}
+
+.reference-pill span {
+	color: var(--text-muted);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.reference-pill strong {
+	font-size: 18px;
+	letter-spacing: 0.04em;
+}
+
+.reference-pill i {
+	width: 44px;
+	height: 28px;
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-sm);
+}
+
+.notice-card,
+.summary-card {
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-md);
+	background: var(--surface-elevated);
+}
+
+.notice-card {
+	display: flex;
+	align-items: center;
+	gap: var(--space-4);
+	padding: var(--space-5) var(--space-8);
+	margin-bottom: var(--space-6);
+	color: var(--text-secondary);
+}
+
+.notice-card > span {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: hsl(39 90% 52%);
+	flex-shrink: 0;
+}
+
+.summary-card {
+	margin-bottom: var(--space-6);
+	overflow: hidden;
+}
+
+.summary-card-head {
+	min-height: 64px;
+	border-bottom: 1px solid var(--border-subtle);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-4);
+	padding: 0 var(--space-8);
+}
+
+.summary-card h2 {
+	text-transform: uppercase;
+	font-size: 16px;
+	letter-spacing: 0.08em;
+}
+
+.status-pill.inline {
+	position: static;
+	border-radius: var(--radius-sm);
+	font-size: 12px;
+	padding: var(--space-1) var(--space-2);
+}
+
+.confirmed-vehicle {
+	display: grid;
+	grid-template-columns: 164px minmax(0, 1fr);
+	gap: var(--space-6);
+	align-items: center;
+	padding: var(--space-6) var(--space-8);
+}
+
+.confirmed-vehicle-media {
+	height: 104px;
+	border-radius: var(--radius-sm);
+	background:
+		radial-gradient(circle at 50% 78%, hsl(0 0% 84%), transparent 34%),
+		linear-gradient(180deg, hsl(0 0% 98%), hsl(0 0% 91%));
+	display: grid;
+	place-items: center;
+	padding: var(--space-4);
+}
+
+.confirmed-vehicle-media img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.confirmed-vehicle-media .detail-fallback-car {
+	width: 78%;
+}
+
+.confirmed-vehicle h3 {
+	font-size: 24px;
+	line-height: 1.2;
+}
+
+.confirmed-vehicle p {
+	color: var(--text-muted);
+	margin-top: var(--space-1);
+}
+
+.tag-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-top: var(--space-3);
+}
+
+.tag-row span {
+	border-radius: var(--radius-sm);
+	background: hsl(0 0% 91%);
+	color: var(--text-secondary);
+	padding: var(--space-1) var(--space-3);
+	font-size: 13px;
+}
+
+.details-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0;
+	padding: var(--space-6) var(--space-8);
+}
+
+.details-grid > div {
+	border-bottom: 1px solid var(--border-subtle);
+	padding: 0 0 var(--space-5);
+}
+
+.details-grid > div:nth-child(n + 3) {
+	border-bottom: 0;
+	padding-top: var(--space-5);
+}
+
+.details-grid span {
+	display: block;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	margin-bottom: var(--space-1);
+}
+
+.details-grid strong {
+	font-size: 18px;
+}
+
+.details-grid p {
+	color: var(--text-muted);
+}
+
+.price-lines {
+	display: grid;
+	padding: var(--space-6) var(--space-8);
+	gap: var(--space-3);
+}
+
+.price-lines > div {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-4);
+	color: var(--text-secondary);
+}
+
+.price-lines strong {
+	color: var(--text-primary);
+}
+
+.price-lines .total-line {
+	border-top: 1px solid var(--border-subtle);
+	padding-top: var(--space-4);
+	margin-top: var(--space-2);
+	color: var(--text-primary);
+	font-weight: 800;
+}
+
+.price-lines .total-line strong {
+	font-size: 26px;
+}
+
+.discount-line strong {
+	color: hsl(142 52% 34%);
+}
+
+.includes-confirmed ul {
+	list-style: none;
+	margin: 0;
+	padding: var(--space-6) var(--space-8);
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--space-3) var(--space-8);
+	color: var(--text-secondary);
+}
+
+.includes-confirmed li::before {
+	content: "✓";
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: var(--brand-dark);
+	color: var(--brand-light);
+	display: inline-grid;
+	place-items: center;
+	font-size: 12px;
+	font-weight: 800;
+	margin-right: var(--space-2);
+}
+
+.confirmation-actions {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 220px;
+	gap: var(--space-4);
+	margin-top: var(--space-8);
+}
+
+.confirmation-actions .btn-secondary,
+.confirmation-actions .btn-quiet {
+	min-height: 56px;
+}
+
+.confirmation-note {
+	text-align: center;
+	color: var(--text-muted);
+	margin-top: var(--space-4);
+}
+
+@media (max-width: 720px) {
+	.confirmation-page {
+		padding-left: var(--space-4);
+		padding-right: var(--space-4);
+	}
+
+	.notice-card,
+	.summary-card-head,
+	.confirmed-vehicle,
+	.details-grid,
+	.price-lines,
+	.includes-confirmed ul {
+		padding-left: var(--space-4);
+		padding-right: var(--space-4);
+	}
+
+	.confirmed-vehicle,
+	.details-grid,
+	.includes-confirmed ul,
+	.confirmation-actions {
+		grid-template-columns: 1fr;
+	}
+
+	.reference-pill {
+		min-width: 0;
+		width: 100%;
+	}
+}
+

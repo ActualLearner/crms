@@ -101,7 +101,7 @@
 						</div>
 						<div class="favourite-tags">
 							<span>${categoryLabel(car.transmission || 'auto')}</span>
-							<span>${car.seats || 5} seats</span>
+							<span>${car.seats || 4} seats</span>
 							<span>${horsepower(car)}</span>
 						</div>
 					</div>
