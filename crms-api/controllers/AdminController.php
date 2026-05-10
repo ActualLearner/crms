@@ -12,9 +12,9 @@ class AdminController extends Controller
     public function stats(): void
     {
         // Revenue
-        $revenueAll = DB::table('bookings')
+        $revenueAll = DB::table(table: 'bookings')
             ->select(['COALESCE(SUM(final_total), 0) as total'])
-            ->where('status', 'completed')
+            ->where('status', opOrVal: 'completed')
             ->first();
 
         $revenueMonth = DB::table('bookings')

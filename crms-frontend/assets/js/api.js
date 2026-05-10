@@ -133,6 +133,25 @@
 		joinWaitlist(carId) {
 			return request(`/waitlist/${carId}`, { method: 'POST' });
 		},
+
+		// AI endpoints
+		ai: {
+			chat(message, history = []) {
+				return request('/ai/chat', {
+					method: 'POST',
+					body: JSON.stringify({ message, history }),
+				});
+			},
+			recommend(prompt) {
+				return request('/ai/recommend', {
+					method: 'POST',
+					body: JSON.stringify({ prompt }),
+				});
+			},
+			summarizeReviews(carId) {
+				return request(`/ai/reviews/${carId}/summary`, { method: 'GET' });
+			},
+		},
 	};
 
 	window.API = API;
