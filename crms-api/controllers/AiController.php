@@ -62,11 +62,31 @@ Available fleet:
             $this->error('Message is required', 422);
         }
 
+        $cars = DB::table('cars')
+            ->select(['id', 'brand', 'model', 'year', 'category',
+                       'seats', 'transmission', 'daily_rate', 'average_rating', 'description',  'penalty_rate'])
+            ->where('status', 'available')
+            ->get();
+
+        $catalog = empty($cars) ? 'No cars available.' : implode("\n", array_map(
+            fn($car) =>
+                "ID:{$car['id']} | {$car['brand']} {$car['model']} ({$car['year']}) | " .
+                "{$car['category']} | {$car['seats']} seats | {$car['transmission']} | " .
+                "\${$car['daily_rate']}/day | Rating: {$car['average_rating']}/5 | " .
+    
+                "Late penalty: \${$car['penalty_rate']}/day",
+            $cars
+        ));
+
         $system = "You are a helpful assistant for CRMS Car Rentals.
 Help customers with questions about bookings, availability, policies, pricing, and choosing cars.
+Based on the customer's request, you can recommend suitable cars from our fleet.
+Always reference cars by their ID and full name (e.g. 'Car #3 - Toyota Corolla').
 Be concise, friendly, and professional. Keep answers under 150 words.
-If asked about specific real-time availability, tell them to use the search and filter on the website.
-Do not invent prices or policies. If unsure, say so honestly.";
+Do not invent prices or policies. If unsure, say so honestly.
+
+Available fleet:
+{$catalog}";
 
         $messages = [];
         foreach ($history as $msg) {
@@ -154,7 +174,7 @@ Keep a neutral, factual tone. Do not use bullet points.";
             ],
         ]);
 
-        $ch = curl_init('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent');
+        $ch = curl_init('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent');
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,

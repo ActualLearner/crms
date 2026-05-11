@@ -1,6 +1,88 @@
 (() => {
 	const params = new URLSearchParams(window.location.search);
 	const carId = params.get('id');
+        const bookingId = params.get('booking_id');
+
+        // Check and render additional UI blocks if needed.
+        function renderConditionalUI() {
+                const column = nodes.form.parentElement;
+
+                if (bookingId) {
+                        nodes.form.style.display = 'none';
+                        const reviewHtml = `
+                                <div class="booking-card" id="review-card">
+                                        <h3>Leave a Review</h3>
+                                        <p>Rate your experience with ${escapeHtml(state.car.brand)} ${escapeHtml(state.car.model)}.</p>
+                                        <label>Rating (1-5)
+                                                <select id="review-rating" style="margin-top: 0.5rem; width: 100%; padding: 0.5rem;">
+                                                        <option value="5">★★★★★ - Excellent</option>
+                                                        <option value="4">★★★★☆ - Good</option>
+                                                        <option value="3">★★★☆☆ - Okay</option>
+                                                        <option value="2">★★☆☆☆ - Poor</option>
+                                                        <option value="1">★☆☆☆☆ - Terrible</option>
+                                                </select>
+                                        </label>
+                                        <label style="margin-top: 1rem; display: block;">Comment
+                                                <textarea id="review-comment" rows="4" placeholder="How was your trip?" style="margin-top: 0.5rem; width: 100%; padding: 0.5rem;"></textarea>
+                                        </label>
+                                        <button type="button" id="submit-review-btn" style="margin-top: 1rem; width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">Submit Review</button>
+                                        <p id="review-message" style="margin-top: 0.5rem; font-size: 0.9em;"></p>
+                                </div>
+                        `;
+                        const temp = document.createElement('div');
+                        temp.innerHTML = reviewHtml;
+                        column.appendChild(temp.firstElementChild);
+
+                        document.getElementById('submit-review-btn').addEventListener('click', async () => {
+                                const btn = document.getElementById('submit-review-btn');
+                                const msg = document.getElementById('review-message');
+                                btn.disabled = true;
+                                try {
+                                        const rating = document.getElementById('review-rating').value;
+                                        const comment = document.getElementById('review-comment').value;
+                                        await window.API.submitReview(bookingId, rating, comment);
+                                        msg.textContent = 'Review submitted successfully!';
+                                        msg.style.color = 'green';
+                                        setTimeout(() => window.location.href = './bookings.html', 1500);
+                                } catch (error) {
+                                        msg.textContent = error.message || 'Unable to submit review.';
+                                        msg.style.color = 'red';
+                                        btn.disabled = false;
+                                }
+                        });
+                        return; // Do not show Waitlist if they are here to review
+                }
+
+                if (state.car.status !== 'available') {
+                        nodes.form.style.display = 'none';
+                        const waitlistHtml = `
+                                <div class="booking-card" id="waitlist-card">
+                                        <h3>Currently Unavailable</h3>
+                                        <p>This car is currently ${escapeHtml(state.car.status)}. Join the waitlist to be notified when it becomes available.</p>
+                                        <button type="button" id="join-waitlist-btn" style="margin-top: 1rem; width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">Notify Me</button>
+                                        <p id="waitlist-message" style="margin-top: 0.5rem; font-size: 0.9em;"></p>
+                                </div>
+                        `;
+                        const temp = document.createElement('div');
+                        temp.innerHTML = waitlistHtml;
+                        column.appendChild(temp.firstElementChild);
+
+                        document.getElementById('join-waitlist-btn').addEventListener('click', async () => {
+                                const btn = document.getElementById('join-waitlist-btn');
+                                const msg = document.getElementById('waitlist-message');
+                                btn.disabled = true;
+                                try {
+                                        await window.API.joinWaitlist(carId);
+                                        msg.textContent = 'You have joined the waitlist! We will notify you.';
+                                        msg.style.color = 'green';
+                                } catch (error) {
+                                        msg.textContent = error.message || 'Unable to join waitlist.';
+                                        msg.style.color = 'red';
+                                        btn.disabled = false;
+                                }
+                        });
+                }
+        }
 
 	const state = {
 		car: null,
@@ -245,6 +327,7 @@
 			state.visibleMonth = new Date();
 			renderDetails();
 			renderCalendar();
+                        renderConditionalUI();
 		} catch (error) {
 			if (error.message?.includes('Unauthenticated')) {
 				window.location.replace('../auth/login.html');

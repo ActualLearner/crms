@@ -68,9 +68,13 @@
 				body: formData,
 			});
 		},
-		me() {
-			return request('/auth/me', { method: 'GET' });
-		},
+		async me() {
+                        const res = await request('/auth/me', { method: 'GET' });
+                        if (res && res.data && res.data.has_notification) {
+                                window.UIUtils?.showNotificationBanner?.(res.data.notification_car);
+                        }
+                        return res;
+                },
 		logout() {
 			return request('/auth/logout', { method: 'POST' });
 		},
@@ -131,10 +135,86 @@
 			return request(`/favourites/${carId}`, { method: 'DELETE' });
 		},
 		joinWaitlist(carId) {
-			return request(`/waitlist/${carId}`, { method: 'POST' });
-		},
+                        return request(`/waitlist/${carId}`, { method: 'POST' });
+                },
+                submitReview(bookingId, rating, comment) {
+                        return request(`/bookings/${bookingId}/review`, {
+                                method: 'POST',
+                                body: JSON.stringify({ rating, comment }),
+                        });
+                },
+                // Admin endpoints
+                adminStats() {
+                        return request('/admin/stats', { method: 'GET' });
+                },
+                adminCustomers(params = {}) {
+			const query = new URLSearchParams();
+			Object.entries(params).forEach(([key, value]) => {
+				if (value !== undefined && value !== null && value !== '') query.set(key, value);
+			});
+                        return request(`/admin/customers${query.toString() ? `?${query}` : ''}`, { method: 'GET' });
+                },
+                adminCustomer(id) {
+                        return request(`/admin/customers/${id}`, { method: 'GET' });
+                },
+                verifyLicense(id) {
+                        return request(`/admin/customers/${id}/verify`, { method: 'PUT' });
+                },
+                addCar(data) {
+                        return request('/cars', {
+                                method: 'POST',
+                                body: JSON.stringify(data),
+                        });
+                },
+                updateCar(id, data) {
+                        return request(`/cars/${id}`, {
+                                method: 'PUT',
+                                body: JSON.stringify(data),
+                        });
+                },
+                deleteCar(id) {
+                        return request(`/cars/${id}`, { method: 'DELETE' });
+                },
+                allBookings(params = {}) {
+			const query = new URLSearchParams();
+			Object.entries(params).forEach(([key, value]) => {
+				if (value !== undefined && value !== null && value !== '') query.set(key, value);
+			});
+                        return request(`/bookings${query.toString() ? `?${query}` : ''}`, { method: 'GET' });
+                },
+                confirmBooking(id) {
+                        return request(`/bookings/${id}/confirm`, { method: 'PUT' });
+                },
+                returnBooking(id, data) {
+                        return request(`/bookings/${id}/return`, {
+                                method: 'PUT',
+                                body: JSON.stringify(data),
+                        });
+                },
+                promos() {
+                        return request('/promos', { method: 'GET' });
+                },
+                createPromo(data) {
+                        return request('/promos', {
+                                method: 'POST',
+                                body: JSON.stringify(data),
+                        });
+                },
+                updatePromo(id, data) {
+                        return request(`/promos/${id}`, {
+                                method: 'PUT',
+                                body: JSON.stringify(data),
+                        });
+                },
+                damageReports() {
+                        return request('/damage-reports', { method: 'GET' });
+                },
+                resolveDamage(id) {
+                        return request(`/damage-reports/${id}/resolve`, { method: 'PUT' });
+                },
+                // End Admin endpoints
 
-		// AI endpoints
+                // AI endpoints
 		ai: {
 			chat(message, history = []) {
 				return request('/ai/chat', {

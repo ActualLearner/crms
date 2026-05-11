@@ -1,2 +1,112 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>CRMS - Admin Dashboard</title></head><body><main><h1>Admin Dashboard</h1><p>Stats + charts + recent bookings (page 9).</p></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Admin Dashboard</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+  <link rel="stylesheet" href="../../assets/css/animations.css" />
+  <link rel="stylesheet" href="../../assets/css/layout.css" />
+  <link rel="stylesheet" href="../../assets/css/components/app-shell.css" />
+  <link rel="stylesheet" href="../../assets/css/components/admin-dashboard.css" />
+</head>
+<body>
+  <div class="app-shell" data-page="admin-dashboard">
+    <div data-component="sidebar"></div>
+    <div class="main-content">
+      <div data-component="navbar"></div>
+      <main class="page-container fade-in">
+        
+        <div class="dash-top">
+          <div>
+            <h1 class="dash-title">Good morning, Admin</h1>
+            <p class="dash-subtitle" id="dash-date-location">Loading date...</p>
+          </div>
+          <div class="dash-actions">
+            <select class="dash-date-filter"><option>Last 30 days</option></select>
+            <button class="btn-black">Export report</button>
+          </div>
+        </div>
+
+        <section class="kpi-grid" id="kpi-container">
+          <!-- Rendered via JS -->
+        </section>
+
+        <section class="charts-row split-2-1">
+          <div class="chart-box">
+             <div class="chart-header">
+                <h2>Revenue over time</h2>
+                <div style="font-size: 0.85rem; color: #8c8c8c;"><span style="display:inline-block; width:10px; height:10px; background:#111; border-radius:2px; margin-right:6px;"></span> Daily revenue</div>
+             </div>
+             <canvas id="revenueChart" style="max-height: 250px;"></canvas>
+          </div>
+          <div class="chart-box">
+             <h2>Fleet status</h2>
+             <p class="subtitle" id="fleet-total-subtitle">0 vehicles total</p>
+             <div class="donut-container">
+                 <canvas id="fleetChart"></canvas>
+             </div>
+             <div class="donut-legend" id="fleet-legend"></div>
+          </div>
+        </section>
+
+        <section class="charts-row split-1-1">
+          <div class="chart-box">
+             <h2>Most rented cars</h2>
+             <canvas id="mostRentedChart" style="max-height: 200px;"></canvas>
+          </div>
+          <div class="chart-box">
+             <h2>Busiest booking hours</h2>
+             <canvas id="busyHoursChart" style="max-height: 200px;"></canvas>
+          </div>
+        </section>
+
+        <section class="table-card">
+          <div class="table-header">
+             <h2>Recent bookings</h2>
+             <div class="table-filters" id="booking-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="active">Active</button>
+                <button class="filter-btn" data-filter="returned">Returned</button>
+                <button class="filter-btn" style="margin-left:8px;">View all</button>
+             </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Vehicle</th>
+                  <th>Pick-up</th>
+                  <th>Return</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="dash-recent-bookings">
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../../assets/js/vendor/jquery-4.0.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/state.js"></script>
+  <script src="../../assets/js/auth-guard.js"></script>
+  <script src="../../assets/js/components/toast.js"></script>
+  <script src="../../assets/js/components/navbar.js"></script>
+  <script src="../../assets/js/components/sidebar.js"></script>
+  <script src="../../js/charts/dashboard-charts.js"></script>
+  <script src="../../js/pages/admin-dashboard.js"></script>
+</body>
+</html>
