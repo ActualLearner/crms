@@ -1,2 +1,218 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>CRMS - Fleet</title></head><body><main><h1>Fleet</h1><p>Car grid + add vehicle modal (pages 10/11).</p></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Admin Fleet Management</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+  <link rel="stylesheet" href="../../assets/css/animations.css" />
+  <link rel="stylesheet" href="../../assets/css/layout.css" />
+</head>
+<body class="surface-b-base text-t-primary">
+  <div class="app-shell" data-page="fleet">
+    <header class="app-topbar">
+      <a class="app-brand" href="./dashboard.html" aria-label="Auto Ultimate home">
+        <span class="brand-icon" aria-hidden="true" style="background:#0a0a0a; color:#fff; border-radius:50%; width:36px; height:36px; display:grid; place-items:center;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+        </span>
+        <span class="brand-text"><span>AUTO</span><span>ULTIMATE</span></span>
+      </a>
+      
+      <!-- Topbar Navbar (Admin layout per screenshot) -->
+      <nav class="topbar-links" style="display:flex; gap:24px; margin-left:24px; align-items:center;">
+        <a href="#">Admin</a>
+        <span style="width:1px; height:24px; background:var(--border-subtle)"></span>
+        <a href="./dashboard.html">Dashboard</a>
+        <a href="./bookings.html">Bookings</a>
+        <a href="./fleet.html" class="active" style="background:#0a0a0a; color:#fff; padding:6px 16px; border-radius:8px;">Fleet</a>
+        <a href="./customers.html">Customers</a>
+        <a href="./promos.html">Promo codes</a>
+      </nav>
+
+      <div class="topbar-user" style="margin-left:auto; display:flex; gap:16px; align-items:center;">
+        <button data-logout style="font-weight: 600; color: var(--text-secondary); cursor: pointer; border: none; background: transparent; padding: 0;">Logout</button>
+        <div class="topbar-user-circle">AD</div>
+      </div>
+    </header>
+
+    <main class="fleet-page">
+      <div class="page-header">
+        <div>
+          <h1>Fleet management</h1>
+          <p class="subtitle" id="stat-total-text"><span id="stat-total-head">0</span> vehicles total</p>
+        </div>
+        <button id="add-vehicle-btn" class="btn-secondary" style="background:#0a0a0a; color:#fff; gap:8px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+          Add vehicle
+        </button>
+      </div>
+      
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total fleet</h3>
+          <p id="stat-total">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Available</h3>
+          <p id="stat-available" class="text-success" style="color:hsl(142, 60%, 45%)">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Rented</h3>
+          <p id="stat-rented">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Maintenance</h3>
+          <p id="stat-maintenance" class="text-warning" style="color:hsl(35, 90%, 50%)">0</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="segmented compact">
+          <input type="radio" id="f-all" name="fleet_status" value="all" checked>
+          <label for="f-all">All</label>
+
+          <input type="radio" id="f-avail" name="fleet_status" value="available">
+          <label for="f-avail">Available</label>
+
+          <input type="radio" id="f-rent" name="fleet_status" value="rented">
+          <label for="f-rent">Rented</label>
+
+          <input type="radio" id="f-maint" name="fleet_status" value="maintenance">
+          <label for="f-maint">Maintenance</label>
+        </div>
+        <input type="text" id="search-input" class="search-input" style="height:40px; border:1px solid var(--border-subtle); background:var(--surface-elevated); border-radius:8px; padding:0 12px; color:var(--text-primary);" placeholder="Search make, model..." />
+      </div>
+
+      <!-- Grid Wrapper (Using same grid styles as customer UI) -->
+      <div class="vehicles-content" style="padding:0; overflow:visible;">
+        <div id="fleet-grid" class="vehicle-grid">
+          <!-- Cars populated by JS -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Vehicle Modal -->
+  <dialog id="add-vehicle-modal" style="width: 500px; max-width:90vw; border:1px solid var(--border-subtle); border-radius:12px; background:var(--surface-elevated); padding:32px; box-shadow:0 10px 40px rgba(0,0,0,0.1);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h2 style="font-size: 20px;">Add vehicle</h2>
+      <button type="button" id="close-modal-btn" style="background:none; border:none; cursor:pointer;"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+    </div>
+    
+    <form id="add-vehicle-form" style="display:flex; flex-direction:column; gap:16px;">
+      
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:14px; color:var(--text-secondary)">Vehicle images</label>
+        <div style="position:relative; border:1px dashed var(--border-strong); border-radius:8px; padding:32px; text-align:center; cursor:pointer; overflow:hidden;">
+          <div id="image-preview-area" style="display:none;">
+            <img id="image-preview" style="max-width:100%; max-height:300px; border-radius:8px;" />
+            <div style="margin-top:12px;">
+              <button type="button" id="change-image-btn" style="background:var(--brand-primary); color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:500;">Change image</button>
+            </div>
+          </div>
+          <div id="image-upload-prompt">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="var(--text-muted)" fill="none" stroke-width="1.5" style="margin-bottom:8px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <div style="font-size:14px; font-weight:500;">Click to upload or drag and drop</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">PNG, JPG up to 10MB each</div>
+          </div>
+          <input type="file" name="image" id="vehicle-image" accept="image/*" style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Make</label>
+          <input type="text" name="make" placeholder="e.g. Mazda" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" required />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Model</label>
+          <input type="text" name="model" placeholder="e.g. 6" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" required />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Year</label>
+          <input type="number" name="year" placeholder="2024" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" required />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Body type</label>
+          <select name="category" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);">
+            <option>Sedan</option>
+            <option>SUV</option>
+            <option>Hatchback</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Price / day ($)</label>
+          <input type="number" name="price_per_day" placeholder="22.99" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" required />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Horsepower</label>
+          <input type="number" name="horsepower" placeholder="250" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Transmission</label>
+          <select name="transmission" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);">
+            <option value="Automatic">Automatic</option>
+            <option value="Manual">Manual</option>
+          </select>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Drive</label>
+          <select name="drive_type" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);">
+            <option value="AWD">AWD</option>
+            <option value="FWD">FWD</option>
+            <option value="RWD">RWD</option>
+            <option value="4WD">4WD</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:14px; color:var(--text-secondary)">Spec line</label>
+        <input type="text" name="spec_line" placeholder="e.g. 2.5 Turbo Premium" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" />
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Seats</label>
+          <input type="number" name="seats" placeholder="5" min="1" max="9" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" required />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:14px; color:var(--text-secondary)">Penalty Rate ($/day)</label>
+          <input type="number" name="penalty_rate" placeholder="0.00" min="0" step="0.01" style="height:40px; background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:0 12px; color:var(--text-primary);" required />
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:14px; color:var(--text-secondary)">Description</label>
+        <textarea name="description" placeholder="e.g. well-maintained, no scratches..." rows="3" style="background:hsl(0,0%,96%); border:1px solid var(--border-subtle); border-radius:8px; padding:12px; color:var(--text-primary); font-family:inherit;"></textarea>
+      </div>
+
+      
+
+      <div style="display:flex; gap:16px; margin-top:8px;">
+        <button type="button" onclick="document.getElementById('add-vehicle-modal').close()" style="flex:1; height:44px; border:1px solid var(--border-subtle); border-radius:8px; background:transparent; font-weight:600; cursor:pointer;">Cancel</button>
+        <button type="submit" style="flex:1; height:44px; border:none; border-radius:8px; background:#000; color:#fff; font-weight:600; cursor:pointer;">Add vehicle</button>
+      </div>
+    </form>
+  </dialog>
+  
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../js/pages/admin-fleet.js"></script>
+</body>
+</html>

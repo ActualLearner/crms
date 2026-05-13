@@ -102,6 +102,7 @@ DB::raw("CREATE TABLE IF NOT EXISTS damage_reports (
     car_id INT NOT NULL,
     description TEXT NOT NULL,
     repair_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+    image_url VARCHAR(255) NULL,
     resolved TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (booking_id) REFERENCES bookings(id),

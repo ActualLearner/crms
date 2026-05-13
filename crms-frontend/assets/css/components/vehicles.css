@@ -221,7 +221,8 @@
 .vehicle-card-top {
 	position: absolute;
 	z-index: 2;
-	top: var(--space-3);
+	/* push badges down for breathing room above the image */
+	top: var(--space-6);
 	left: var(--space-3);
 	right: var(--space-3);
 	display: flex;
@@ -237,6 +238,7 @@
 	align-items: center;
 	gap: var(--space-3);
 	flex-wrap: wrap;
+	padding-top: 10px;
 }
 
 .rating {
@@ -279,7 +281,8 @@
 		linear-gradient(180deg, hsl(0 0% 99%), hsl(0 0% 93%));
 	display: grid;
 	place-items: center;
-	padding: var(--space-8) var(--space-8) var(--space-4);
+	/* increase top padding so top badges have breathing room above the image */
+	padding: var(--space-10) var(--space-8) var(--space-4);
 }
 
 .vehicle-media img {

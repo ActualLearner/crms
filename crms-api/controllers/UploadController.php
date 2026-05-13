@@ -19,8 +19,26 @@ class UploadController extends Controller
         ];
         $maxSize = 10 * 1024 * 1024;
 
-        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            $this->error('Upload failed', 500);
+        // Log file info for debugging
+        error_log('Upload attempt - Name: ' . ($file['name'] ?? 'unknown') . ', Size: ' . ($file['size'] ?? 0) . ', Error: ' . ($file['error'] ?? 'none'));
+
+        // Check for upload errors
+        $errorCode = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+        if ($errorCode !== UPLOAD_ERR_OK) {
+            $errorMessages = [
+                UPLOAD_ERR_INI_SIZE   => 'File exceeds upload_max_filesize',
+                UPLOAD_ERR_FORM_SIZE  => 'File exceeds MAX_FILE_SIZE',
+                UPLOAD_ERR_PARTIAL    => 'File was only partially uploaded',
+                UPLOAD_ERR_NO_FILE    => 'No file was uploaded',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+            ];
+            $this->error($errorMessages[$errorCode] ?? 'Upload failed', 422);
+        }
+
+        // Check file size
+        if (($file['size'] ?? 0) === 0) {
+            $this->error('File is empty. Please select a valid image file', 422);
         }
 
         if (($file['size'] ?? 0) > $maxSize) {
@@ -28,8 +46,9 @@ class UploadController extends Controller
         }
 
         $mime = mime_content_type($file['tmp_name']);
+        error_log('Detected MIME type: ' . ($mime ?? 'unknown'));
         if (!isset($allowed[$mime])) {
-            $this->error('Only JPG, PNG and WebP images are allowed', 422);
+            $this->error("Invalid file type: $mime. Only JPG, PNG and WebP images are allowed", 422);
         }
 
         $type   = $_POST['type'] ?? 'car';

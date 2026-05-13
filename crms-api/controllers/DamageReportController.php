@@ -44,6 +44,7 @@ class DamageReportController extends Controller
             'car_id'      => (int) $data['car_id'],
             'description' => trim($data['description']),
             'repair_cost' => (float) $data['repair_cost'],
+            'image_url'   => $data['image_url'] ?? null,
             'resolved'    => 0,
         ]);
 
