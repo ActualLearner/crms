@@ -128,6 +128,9 @@
 		favourites() {
 			return request('/favourites', { method: 'GET' });
 		},
+		waitlistMine() {
+			return request('/waitlist/mine', { method: 'GET' });
+		},
 		addFavourite(carId) {
 			return request(`/favourites/${carId}`, { method: 'POST' });
 		},

@@ -5,22 +5,13 @@
 	let activeFilter = 'all';
 	const body = document.getElementById('customers-table');
 	const search = document.getElementById('customer-search');
-
-	function enriched(customer) {
-		return {
-			...customer,
-			booking_count: Number(customer.booking_count || customer.rentals || 0),
-			total_spent: Number(customer.total_spent || 0),
-			currently_renting: Boolean(customer.currently_renting || customer.active_booking),
-		};
-	}
+	let stats = { verified: 0, pending: 0, renting: 0 };
 
 	function updateStats(total) {
-		const verified = customers.filter(c => Number(c.license_verified) === 1).length;
 		UI.setText('customers-total', total ?? customers.length);
-		UI.setText('customers-verified', verified);
-		UI.setText('customers-pending', Math.max(0, customers.length - verified));
-		UI.setText('customers-renting', customers.filter(c => c.currently_renting).length);
+		UI.setText('customers-verified', stats.verified ?? 0);
+		UI.setText('customers-pending', stats.pending ?? 0);
+		UI.setText('customers-renting', stats.renting ?? 0);
 	}
 
 	function filtered() {
@@ -54,30 +45,18 @@
 		}).join('') : `<tr><td colspan="7">${UI.empty('No customers match those filters.')}</td></tr>`;
 	}
 
-	async function hydrateDetails(list) {
-		const slice = list.slice(0, 15);
-		const details = await Promise.all(slice.map(async customer => {
-			try {
-				const res = await window.API.adminCustomer(customer.id);
-				const detail = res.data || {};
-				return enriched({
-					...customer,
-					booking_count: detail.booking_count,
-					total_spent: detail.total_spent,
-					currently_renting: (detail.bookings || []).some(b => ['active', 'confirmed'].includes(b.status)),
-				});
-			} catch {
-				return enriched(customer);
-			}
-		}));
-		return details;
-	}
 
 	async function load() {
 		try {
 			const res = await window.API.adminCustomers({ page: 1 });
 			const unwrapped = UI.unwrap(res);
-			customers = await hydrateDetails(unwrapped.items);
+			stats = unwrapped.meta?.stats || stats;
+			customers = unwrapped.items.map(customer => ({
+				...customer,
+				booking_count: Number(customer.booking_count || 0),
+				total_spent: Number(customer.total_spent || 0),
+				currently_renting: Boolean(customer.currently_renting),
+			}));
 			updateStats(unwrapped.total);
 			render();
 		} catch (error) {
