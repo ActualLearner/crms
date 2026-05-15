@@ -63,12 +63,21 @@
                 <path d="M8 11V8a4 4 0 1 1 8 0v3"></path>
               </svg>
               <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
-              <span class="input-tail" aria-hidden="true">
-                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
+              <button
+                class="input-tail password-toggle"
+                type="button"
+                aria-label="Show password"
+                aria-pressed="false"
+                data-password-toggle
+                data-target="password"
+              >
+                <svg class="input-icon password-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path class="password-toggle-visible" d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"></path>
+                  <circle class="password-toggle-visible" cx="12" cy="12" r="3"></circle>
+                  <path class="password-toggle-hidden" d="M3 3l18 18"></path>
+                  <path class="password-toggle-hidden" d="M10.6 10.6a3 3 0 0 0 4.2 4.2"></path>
                 </svg>
-              </span>
+              </button>
             </div>
           </div>
 

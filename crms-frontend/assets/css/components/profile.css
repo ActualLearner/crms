@@ -156,10 +156,45 @@ color: var(--text-primary);
     gap: var(--space-2);
 }
 
+.profile-notification-list {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.profile-notification-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.profile-notification-item strong {
+    display: block;
+    margin-bottom: var(--space-1);
+}
+
+.profile-notification-item .btn-secondary {
+    min-width: 120px;
+    white-space: nowrap;
+}
+
 @media (max-width: 900px) {
 .profile-page {
 grid-template-columns: 1fr;
 }
+
+    .profile-notification-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .profile-notification-item .btn-secondary {
+        width: 100%;
+    }
 }
 @media (max-width: 600px) {
     .profile-grid-2 {

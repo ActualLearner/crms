@@ -108,7 +108,10 @@ class AdminController extends Controller
             ->orderBy('created_at', 'DESC');
 
         if (!empty($_GET['search'])) {
-            $query = $query->where('name', 'LIKE', '%' . $_GET['search'] . '%');
+            $search = trim((string) $_GET['search']);
+            $query = $query
+                ->where('name', 'LIKE', '%' . $search . '%')
+                ->orWhere('email', 'LIKE', '%' . $search . '%');
         }
 
         $payload = $query->paginate(15, $page);
@@ -169,7 +172,6 @@ class AdminController extends Controller
             ->whereIn('bookings.status', ['active', 'confirmed'])
             ->first();
 
-        $payload = $query->paginate(15, $page);
         $payload['stats'] = [
             'verified' => $verifiedCustomers,
             'pending' => $pendingCustomers,

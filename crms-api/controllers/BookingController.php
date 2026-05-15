@@ -186,6 +186,9 @@ class BookingController extends Controller
         if ($errors) {
             $this->error('Validation failed', 422, $errors);
         }
+        if ($data['condition'] === 'damaged' && trim((string) ($data['damage_description'] ?? '')) === '') {
+            $this->error('Damage description is required when the vehicle is marked damaged', 422);
+        }
 
         $booking = Booking::find((int) $id);
         if (!$booking) {
@@ -237,7 +240,7 @@ class BookingController extends Controller
         $query = DB::table('bookings')
             ->select([
                 'bookings.*',
-                'cars.brand', 'cars.model', 'cars.image_url',
+                'cars.brand', 'cars.model', 'cars.image_url', 'cars.penalty_rate',
                 'users.name as customer_name', 'users.email as customer_email',
             ])
             ->join('cars', 'bookings.car_id', 'cars.id')

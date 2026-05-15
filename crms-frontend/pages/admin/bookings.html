@@ -48,19 +48,46 @@
     </main>
   </div>
   <dialog class="admin-modal" id="return-modal">
-    <form method="dialog" id="return-form">
+    <form id="return-form">
       <div class="admin-modal-header"><h2>Log vehicle return</h2><button class="admin-btn" value="cancel" type="button" data-close-return>Close</button></div>
       <div class="admin-modal-body">
-        <div class="return-stepper"><div class="return-step active"><span>1</span><span>Return details</span></div><div class="return-step"><span>2</span><span>Damage report</span></div><div class="return-step"><span>3</span><span>Confirm</span></div></div>
-        <div id="return-summary" class="alert"></div>
-        <div class="form-grid">
-          <div class="field"><label for="actual-return-date">Actual return date</label><input id="actual-return-date" name="actual_return_date" class="admin-input" type="date" required /></div>
-          <div class="field"><label for="return-condition">Condition</label><select id="return-condition" name="condition" class="admin-select"><option value="excellent">Excellent</option><option value="good">Good</option><option value="damaged">Damaged</option></select></div>
-          <div class="field full" data-damage-field hidden><label for="damage-description">Damage description</label><textarea id="damage-description" name="damage_description" class="admin-textarea" placeholder="Describe location, type, and severity"></textarea></div>
-          <div class="field" data-damage-field hidden><label for="repair-cost">Estimated repair cost</label><input id="repair-cost" name="repair_cost" class="admin-input" type="number" min="0" step="0.01" value="0" /></div>
+        <p class="return-helper">Record the return date and condition of the vehicle</p>
+        <div class="return-stepper">
+          <div class="return-step active" data-return-step-indicator="details"><span>1</span><span>Return details</span></div>
+          <div class="return-step" data-return-step-indicator="damage"><span>2</span><span>Damage report</span></div>
+          <div class="return-step" data-return-step-indicator="confirm"><span>3</span><span>Confirm</span></div>
         </div>
+        <div id="return-summary" class="return-booking-summary"></div>
+        <section class="return-panel active" data-return-panel="details">
+          <div class="form-grid">
+            <div class="field"><label for="actual-return-date">Actual return date</label><input id="actual-return-date" name="actual_return_date" class="admin-input return-dark-input" type="date" required /></div>
+            <div class="field"><label for="actual-return-time">Return time</label><input id="actual-return-time" name="actual_return_time" class="admin-input return-dark-input" type="time" /></div>
+          </div>
+          <div id="return-late-alert" class="alert" hidden></div>
+          <div class="field">
+            <span class="field-label">Vehicle condition</span>
+            <input id="return-condition" name="condition" type="hidden" value="excellent" />
+            <div class="condition-grid">
+              <button class="condition-card active" type="button" data-condition-value="excellent"><span class="condition-icon success">OK</span><strong>Excellent</strong><small>No issues, clean and ready</small></button>
+              <button class="condition-card" type="button" data-condition-value="good"><span class="condition-icon warning">!</span><strong>Good</strong><small>Minor wear, no damage</small></button>
+              <button class="condition-card" type="button" data-condition-value="damaged"><span class="condition-icon danger">!</span><strong>Damaged</strong><small>Visible damage reported</small></button>
+            </div>
+          </div>
+        </section>
+        <section class="return-panel" data-return-panel="damage">
+          <div class="alert danger">Damage reported - please fill in the damage report below.</div>
+          <div class="form-grid">
+            <div class="field full"><label for="damage-description">Damage description</label><textarea id="damage-description" name="damage_description" class="admin-textarea return-dark-input" placeholder="Describe the damage in detail - location, type, severity..."></textarea></div>
+            <div class="field"><label for="repair-cost">Estimated repair cost ($)</label><input id="repair-cost" name="repair_cost" class="admin-input return-dark-input" type="number" min="0" step="0.01" value="0" /></div>
+            <div class="field"><label for="damage-severity">Damage severity</label><select id="damage-severity" name="damage_severity" class="admin-select"><option>Minor</option><option>Moderate</option><option>Severe</option></select></div>
+          </div>
+        </section>
+        <section class="return-panel" data-return-panel="confirm">
+          <h3 class="return-confirm-title">Confirm return summary</h3>
+          <dl class="return-summary-list" data-return-confirm></dl>
+        </section>
       </div>
-      <div class="admin-modal-actions"><button class="admin-btn" type="button" data-close-return>Back</button><button class="admin-btn primary" type="submit">Confirm return</button></div>
+      <div class="admin-modal-actions"><button class="admin-btn" type="button" data-return-back>Back</button><button class="admin-btn primary" type="button" data-return-next>Continue</button><button class="admin-btn primary" type="submit" data-return-submit hidden>Confirm return</button></div>
     </form>
   </dialog>
   <script src="../../assets/js/api.js"></script>

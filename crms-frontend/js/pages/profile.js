@@ -16,6 +16,46 @@
 			
 			const initials = parts.map(p => p[0]).slice(0, 2).join('').toUpperCase();
 			document.querySelectorAll('[data-user-initials]').forEach(el => el.textContent = initials);
+
+            const notificationPanel = document.querySelector('#notifications .profile-note');
+            if (notificationPanel) {
+                try {
+                    const waitlistRes = await window.API.waitlistMine();
+                    const waitlistItems = waitlistRes.data || [];
+                    const availableAlerts = waitlistItems.filter(item => item.status === 'available' || Number(item.notified) === 1);
+
+                    if (!waitlistItems.length) {
+                        notificationPanel.innerHTML = `
+                            <p>You are not on any waitlist yet.</p>
+                            <p class="muted">Open any unavailable car and tap Notify me to get availability alerts.</p>
+                        `;
+                    } else if (!availableAlerts.length) {
+                        notificationPanel.innerHTML = `
+                            <p>No waitlisted car is available yet.</p>
+                            <p class="muted">We will notify you here when one of your watched cars becomes available.</p>
+                        `;
+                    } else {
+                        notificationPanel.innerHTML = `
+                            <div class="profile-notification-list">
+                                ${availableAlerts.map(item => `
+                                    <article class="profile-notification-item">
+                                        <div>
+                                            <strong>${item.brand} ${item.model} is now available</strong>
+                                            <p class="muted">${item.category || 'Vehicle'} · ${window.UIUtils.formatMoney(item.daily_rate)} / day</p>
+                                        </div>
+                                        <a class="btn-secondary" href="./car-detail.html?id=${item.car_id}&book=1">Book now</a>
+                                    </article>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                } catch {
+                    notificationPanel.innerHTML = `
+                        <p>We could not load your waitlist notifications right now.</p>
+                        <p class="muted">Try again in a moment or use Manage to open your waitlist page.</p>
+                    `;
+                }
+            }
 			
 		} catch (err) {
 			console.error(err);

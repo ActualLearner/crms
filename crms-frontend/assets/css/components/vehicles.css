@@ -218,29 +218,6 @@
 	border-color: hsl(220 8% 66%);
 }
 
-.vehicle-card-top {
-	position: absolute;
-	z-index: 2;
-	/* push badges down for breathing room above the image */
-	top: var(--space-6);
-	left: var(--space-3);
-	right: var(--space-3);
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--space-3);
-	font-size: 12px;
-	color: var(--text-secondary);
-}
-
-.vehicle-meta {
-	display: flex;
-	align-items: center;
-	gap: var(--space-3);
-	flex-wrap: wrap;
-	padding-top: 10px;
-}
-
 .rating {
 	color: hsl(45 85% 38%);
 	font-weight: 600;
@@ -275,21 +252,66 @@
 }
 
 .vehicle-media {
-	height: 188px;
+	position: relative;
+	aspect-ratio: 16 / 9;
 	background:
 		radial-gradient(circle at 50% 78%, hsl(0 0% 84%), transparent 34%),
 		linear-gradient(180deg, hsl(0 0% 99%), hsl(0 0% 93%));
 	display: grid;
 	place-items: center;
-	/* increase top padding so top badges have breathing room above the image */
-	padding: var(--space-10) var(--space-8) var(--space-4);
+	padding: var(--space-7) var(--space-4) var(--space-4);
+	overflow: hidden;
 }
 
 .vehicle-media img {
 	width: 100%;
 	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
 	object-fit: contain;
+	object-position: center;
 	display: block;
+	border-radius: calc(var(--radius-sm) - 2px);
+	background: hsl(0 0% 94%);
+}
+
+.vehicle-seat-chip,
+.vehicle-status-chip {
+	position: absolute;
+	z-index: 2;
+	top: var(--space-3);
+	max-width: calc(50% - var(--space-4));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	border-radius: 999px;
+	padding: var(--space-1) var(--space-3);
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.4;
+	backdrop-filter: blur(8px);
+}
+
+.vehicle-seat-chip {
+	left: var(--space-3);
+	background: hsl(0 0% 100% / 0.86);
+	color: var(--text-primary);
+}
+
+.vehicle-status-chip {
+	right: var(--space-3);
+	background: var(--brand-dark);
+	color: var(--brand-light);
+	text-transform: capitalize;
+}
+
+.vehicle-status-chip.available {
+	background: hsl(145 52% 32% / 0.92);
+}
+
+.vehicle-status-chip.maintenance {
+	background: hsl(38 84% 42% / 0.92);
+	color: hsl(40 20% 96%);
 }
 
 .vehicle-fallback {
@@ -330,10 +352,10 @@
 }
 
 .vehicle-title-row {
-	display: flex;
-	align-items: end;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
 	gap: var(--space-3);
+	align-items: start;
 }
 
 .vehicle-title-row h2 {
@@ -345,9 +367,11 @@
 .vehicle-subtitle {
 	color: var(--text-muted);
 	font-size: 13px;
-	white-space: nowrap;
+	white-space: normal;
 	overflow: hidden;
-	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
 }
 
 .vehicle-price {
@@ -360,6 +384,14 @@
 	font-size: 12px;
 	font-weight: 500;
 	color: var(--text-muted);
+}
+
+.vehicle-card-meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-3);
+	min-height: 36px;
 }
 
 .vehicle-actions {
@@ -570,8 +602,7 @@
 	}
 
 	.vehicle-title-row {
-		align-items: start;
-		flex-direction: column;
+		grid-template-columns: 1fr;
 	}
 
 	.vehicle-actions {
@@ -583,4 +614,3 @@
 		width: 100%;
 	}
 }
-

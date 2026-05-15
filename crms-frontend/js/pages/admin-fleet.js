@@ -9,7 +9,8 @@
     function imageSrc(imageUrl) {
         if (!imageUrl) return placeholder;
         if (window.API?.resolveUrl) return window.API.resolveUrl(imageUrl);
-        return imageUrl.startsWith('http') ? imageUrl : API_BASE + imageUrl;
+        if (imageUrl.startsWith('http')) return imageUrl;
+        return API_BASE + (imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`);
     }
 
     function getCarById(id) {

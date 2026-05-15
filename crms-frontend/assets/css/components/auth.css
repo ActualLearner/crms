@@ -166,6 +166,37 @@
 	place-items: center;
 }
 
+.password-toggle {
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	font: inherit;
+	padding-right: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	min-width: 44px;
+	min-height: 44px;
+	transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+	color: var(--text-primary);
+}
+
+.password-toggle:focus-visible {
+	outline: 2px solid var(--text-primary);
+	outline-offset: 2px;
+}
+
+.password-toggle-icon {
+	position: relative;
+}
+
+.password-toggle-hidden {
+	display: none;
+}
+
 .remember {
 	display: flex;
 	align-items: center;

@@ -14,6 +14,7 @@
 
 	function renderProfile(customer) {
 		const verified = Number(customer.license_verified) === 1;
+		const hasLicenseNumber = Boolean(String(customer.license_number || '').trim());
 		const bookings = customer.bookings || [];
 		const active = bookings.some(b => ['active', 'confirmed'].includes(b.status));
 		document.getElementById('crumb-name').textContent = customer.name;
@@ -35,7 +36,7 @@
 				<div class="metric-tile"><span>Total rentals</span><strong>${bookings.length}</strong></div>
 				<div class="metric-tile"><span>Total spent</span><strong>${UI.money(customer.total_spent)}</strong></div>
 			</div>
-			<button class="admin-btn ${verified ? '' : 'primary'}" data-verify="${customer.id}">${verified ? 'Remove verification' : 'Verify license'}</button>
+			<button class="admin-btn ${verified ? '' : 'primary'}" data-verify="${customer.id}" ${!hasLicenseNumber ? 'disabled' : ''}>${!hasLicenseNumber ? 'No license number' : (verified ? 'Remove verification' : 'Verify license')}</button>
 			<button class="admin-btn danger" type="button">Suspend account</button>
 		`;
 	}

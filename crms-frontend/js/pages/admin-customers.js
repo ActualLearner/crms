@@ -32,6 +32,7 @@
 		const rows = filtered();
 		body.innerHTML = rows.length ? rows.map(customer => {
 			const verified = Number(customer.license_verified) === 1;
+			const hasLicenseNumber = Boolean(String(customer.license_number || '').trim());
 			return `
 				<tr>
 					<td><div class="identity-cell"><span class="avatar-token">${UI.initials(customer.name)}</span>${customer.currently_renting ? '<span class="live-dot"></span>' : ''}<strong class="truncate">${UI.escape(customer.name)}</strong></div></td>
@@ -39,8 +40,18 @@
 					<td>${UI.date(customer.created_at)}</td>
 					<td><strong>${customer.booking_count}</strong></td>
 					<td><strong>${UI.money(customer.total_spent)}</strong></td>
-					<td>${UI.status(verified ? 'verified' : 'pending')}</td>
-					<td><div class="admin-row-actions"><a class="admin-btn" href="./customer-detail.html?id=${customer.id}">View</a><button class="admin-btn ${verified ? '' : 'primary'}" data-verify="${customer.id}">${verified ? 'Unverify' : 'Verify'}</button></div></td>
+					<td>
+						<div class="license-cell">
+							${UI.status(verified ? 'verified' : 'pending')}
+							<small class="tone-muted">${UI.escape(hasLicenseNumber ? customer.license_number : 'No license number')}</small>
+						</div>
+					</td>
+					<td>
+						<div class="admin-row-actions">
+							<a class="admin-btn" href="./customer-detail.html?id=${customer.id}">View</a>
+							<button class="admin-btn ${verified ? '' : 'primary'}" data-verify="${customer.id}" ${!hasLicenseNumber ? 'disabled' : ''}>${!hasLicenseNumber ? 'No license' : (verified ? 'Unverify' : 'Verify')}</button>
+						</div>
+					</td>
 				</tr>`;
 		}).join('') : `<tr><td colspan="7">${UI.empty('No customers match those filters.')}</td></tr>`;
 	}

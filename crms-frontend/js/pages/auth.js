@@ -7,6 +7,7 @@
 	const mode = form.dataset.authMode || 'login';
 	const emailInput = form.querySelector('[name="email"]');
 	const passwordInput = form.querySelector('[name="password"]');
+	const passwordToggle = form.querySelector('[data-password-toggle]');
 	const submitButtonText = mode === 'register' ? 'Create account' : 'Sign in';
 	const loadingText = mode === 'register' ? 'Creating account...' : 'Signing in...';
 
@@ -26,9 +27,36 @@
 		submitButton.textContent = isLoading ? loadingText : submitButtonText;
 	}
 
+	function setPasswordVisibility(isVisible) {
+		if (!passwordInput || !passwordToggle) {
+			return;
+		}
+
+		passwordInput.type = isVisible ? 'text' : 'password';
+		passwordToggle.setAttribute('aria-pressed', String(isVisible));
+		passwordToggle.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
+
+		const visibleIcons = passwordToggle.querySelectorAll('.password-toggle-visible');
+		const hiddenIcons = passwordToggle.querySelectorAll('.password-toggle-hidden');
+		visibleIcons.forEach((node) => {
+			node.style.display = isVisible ? 'none' : '';
+		});
+		hiddenIcons.forEach((node) => {
+			node.style.display = isVisible ? '' : 'none';
+		});
+	}
+
 	function redirectAfterLogin(user) {
 		const redirectUrl = window.AuthGuard?.getAuthenticatedRedirect(user) || '../customer/vehicles.html';
 		window.location.replace(redirectUrl);
+	}
+
+	if (passwordToggle && passwordInput) {
+		setPasswordVisibility(false);
+		passwordToggle.addEventListener('click', () => {
+			setPasswordVisibility(passwordInput.type === 'password');
+			passwordInput.focus();
+		});
 	}
 
 	function getRegistrationPayload() {

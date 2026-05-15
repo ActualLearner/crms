@@ -4,12 +4,36 @@
 	let bookings = [];
 	let activeStatus = 'all';
 	let returnBooking = null;
+	let returnStep = 'details';
 
 	const body = document.getElementById('bookings-table');
 	const search = document.getElementById('booking-search');
 	const modal = document.getElementById('return-modal');
 	const form = document.getElementById('return-form');
 	const condition = document.getElementById('return-condition');
+	const backButton = document.querySelector('[data-return-back]');
+	const nextButton = document.querySelector('[data-return-next]');
+	const submitButton = document.querySelector('[data-return-submit]');
+	const confirmList = document.querySelector('[data-return-confirm]');
+	const lateAlert = document.getElementById('return-late-alert');
+
+	function syncReturnActions(step) {
+		nextButton.textContent = 'Continue';
+		submitButton.textContent = 'Confirm return';
+
+		if (step === 'confirm') {
+			nextButton.hidden = true;
+			nextButton.style.display = 'none';
+			submitButton.hidden = false;
+			submitButton.style.display = '';
+			return;
+		}
+
+		nextButton.hidden = false;
+		nextButton.style.display = '';
+		submitButton.hidden = true;
+		submitButton.style.display = 'none';
+	}
 
 	function normalizeStatus(status) {
 		return status === 'completed' ? 'returned' : status;
@@ -74,16 +98,92 @@
 	function openReturn(id) {
 		returnBooking = bookings.find(booking => String(booking.id) === String(id));
 		if (!returnBooking) return;
-		document.getElementById('return-summary').innerHTML = `<strong>${UI.escape(returnBooking.brand)} ${UI.escape(returnBooking.model)}</strong> rented by ${UI.escape(returnBooking.customer_name)} · expected ${UI.date(returnBooking.expected_return_date || returnBooking.end_date)}`;
+		document.getElementById('return-summary').innerHTML = `
+			<div class="return-summary-thumb" aria-hidden="true"></div>
+			<div>
+				<strong>${UI.escape(returnBooking.brand)} ${UI.escape(returnBooking.model)}</strong>
+				<p>${UI.escape(returnBooking.customer_name)} · ${UI.date(returnBooking.start_date, { year: false })} → ${UI.date(returnBooking.expected_return_date || returnBooking.end_date)}</p>
+				<span>${UI.escape(returnBooking.reference_number || `#${returnBooking.id}`)}</span>
+			</div>`;
 		document.getElementById('actual-return-date').value = new Date().toISOString().slice(0, 10);
-		condition.value = 'excellent';
-		toggleDamage();
+		document.getElementById('actual-return-time').value = new Date().toTimeString().slice(0, 5);
+		setCondition('excellent');
+		setReturnStep('details');
 		modal.showModal();
 	}
 
-	function toggleDamage() {
-		const damaged = condition.value === 'damaged';
-		document.querySelectorAll('[data-damage-field]').forEach(el => { el.hidden = !damaged; });
+	function lateFee() {
+		if (!returnBooking) return { lateDays: 0, penalty: 0 };
+		const actualValue = document.getElementById('actual-return-date').value;
+		const expectedValue = returnBooking.expected_return_date || returnBooking.end_date;
+		const actual = new Date(`${actualValue}T00:00:00`);
+		const expected = new Date(`${String(expectedValue).slice(0, 10)}T00:00:00`);
+		const lateDays = Number.isNaN(actual.getTime()) || Number.isNaN(expected.getTime())
+			? 0
+			: Math.max(0, Math.round((actual - expected) / 86400000));
+		const penalty = lateDays * Number(returnBooking.penalty_rate || 0);
+		return { lateDays, penalty };
+	}
+
+	function updateLateAlert() {
+		const { lateDays, penalty } = lateFee();
+		if (!lateDays) {
+			lateAlert.hidden = true;
+			lateAlert.textContent = '';
+			return;
+		}
+		lateAlert.hidden = false;
+		lateAlert.textContent = `Return is ${lateDays} day${lateDays === 1 ? '' : 's'} late. Penalty rate applies: ${UI.money(penalty)} added.`;
+	}
+
+	function setCondition(value) {
+		condition.value = value;
+		document.querySelectorAll('[data-condition-value]').forEach(card => {
+			card.classList.toggle('active', card.dataset.conditionValue === value);
+		});
+		updateLateAlert();
+	}
+
+	function buildConfirmation() {
+		if (!returnBooking || !confirmList) return;
+		const formData = Object.fromEntries(new FormData(form).entries());
+		const { lateDays, penalty } = lateFee();
+		const baseTotal = Number(returnBooking.final_total || 0);
+		const repairEstimate = formData.condition === 'damaged' ? Number(formData.repair_cost || 0) : 0;
+		const finalTotal = baseTotal + penalty + repairEstimate;
+		const rows = [
+			['Booking ref', returnBooking.reference_number || `#${returnBooking.id}`],
+			['Customer', returnBooking.customer_name],
+			['Vehicle', `${returnBooking.brand} ${returnBooking.model}`],
+			['Actual return date', `${UI.date(formData.actual_return_date)}${formData.actual_return_time ? ` at ${formData.actual_return_time}` : ''}`],
+			['Condition', formData.condition],
+			['Base rental total', UI.money(baseTotal)],
+			['Late penalty', lateDays ? `+ ${UI.money(penalty)}` : UI.money(0)],
+			['Grand total', UI.money(finalTotal)],
+		];
+		if (formData.condition === 'damaged') {
+			rows.splice(6, 0, ['Repair estimate', UI.money(repairEstimate)]);
+		}
+		confirmList.innerHTML = rows.map(([label, value]) => `<div><dt>${UI.escape(label)}</dt><dd>${UI.escape(value)}</dd></div>`).join('');
+	}
+
+	function setReturnStep(step) {
+		returnStep = step;
+		document.querySelectorAll('[data-return-panel]').forEach(panel => {
+			panel.classList.toggle('active', panel.dataset.returnPanel === step);
+		});
+		const order = ['details', 'damage', 'confirm'];
+		const currentIndex = order.indexOf(step);
+		document.querySelectorAll('[data-return-step-indicator]').forEach(indicator => {
+			const index = order.indexOf(indicator.dataset.returnStepIndicator);
+			indicator.classList.toggle('active', index === currentIndex);
+			indicator.classList.toggle('done', index < currentIndex || (step === 'confirm' && indicator.dataset.returnStepIndicator === 'damage' && condition.value !== 'damaged'));
+			indicator.classList.toggle('skipped', indicator.dataset.returnStepIndicator === 'damage' && condition.value !== 'damaged');
+		});
+		backButton.textContent = step === 'details' ? 'Close' : 'Back';
+		syncReturnActions(step);
+		updateLateAlert();
+		if (step === 'confirm') buildConfirmation();
 	}
 
 	document.querySelector('[data-booking-tabs]')?.addEventListener('click', event => {
@@ -95,8 +195,37 @@
 	});
 
 	search?.addEventListener('input', render);
-	condition?.addEventListener('change', toggleDamage);
+	document.getElementById('actual-return-date')?.addEventListener('change', updateLateAlert);
+	document.querySelectorAll('[data-condition-value]').forEach(card => {
+		card.addEventListener('click', () => setCondition(card.dataset.conditionValue));
+	});
 	document.querySelectorAll('[data-close-return]').forEach(btn => btn.addEventListener('click', () => modal.close()));
+	modal?.addEventListener('close', () => {
+		syncReturnActions('details');
+	});
+	backButton?.addEventListener('click', () => {
+		if (returnStep === 'details') {
+			modal.close();
+			return;
+		}
+		setReturnStep(returnStep === 'confirm' && condition.value === 'damaged' ? 'damage' : 'details');
+	});
+	nextButton?.addEventListener('click', () => {
+		if (!form.reportValidity()) return;
+		if (returnStep === 'details') {
+			setReturnStep(condition.value === 'damaged' ? 'damage' : 'confirm');
+			return;
+		}
+		if (returnStep === 'damage') {
+			const damageDescription = document.getElementById('damage-description');
+			if (!damageDescription.value.trim()) {
+				damageDescription.focus();
+				UI.toast('Damage description is required');
+				return;
+			}
+			setReturnStep('confirm');
+		}
+	});
 
 	body?.addEventListener('click', async event => {
 		const confirm = event.target.closest('[data-confirm]');
@@ -117,6 +246,8 @@
 		event.preventDefault();
 		if (!returnBooking) return;
 		const data = Object.fromEntries(new FormData(form).entries());
+		delete data.actual_return_time;
+		delete data.damage_severity;
 		if (data.condition !== 'damaged') {
 			delete data.damage_description;
 			delete data.repair_cost;

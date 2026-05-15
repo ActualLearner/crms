@@ -142,6 +142,15 @@ class QueryBuilder
     public function count(): int
     {
         $clone            = clone $this;
+        if ($clone->group !== null) {
+            $clone->selects   = ['1'];
+            $clone->order     = null;
+            $clone->limitVal  = null;
+            $clone->offsetVal = null;
+            $row = $clone->run('SELECT COUNT(*) as total FROM (' . $clone->buildSelect() . ') as grouped_count')->fetch();
+            return (int) ($row['total'] ?? 0);
+        }
+
         $clone->selects   = ['COUNT(*) as total'];
         $clone->order     = null;
         $clone->limitVal  = null;
@@ -173,7 +182,7 @@ class QueryBuilder
         if (empty($data)) {
             throw new InvalidArgumentException('Insert data cannot be empty');
         }
-        $cols = implode(', ', array_keys($data));
+        $cols = implode(', ', array_map(fn($key) => $this->quoteIdentifier((string) $key), array_keys($data)));
         $ph   = implode(', ', array_fill(0, count($data), '?'));
         $this->run(
             "INSERT INTO {$this->table} ({$cols}) VALUES ({$ph})",
@@ -187,7 +196,7 @@ class QueryBuilder
         if (empty($data)) {
             return 0;
         }
-        $set  = implode(', ', array_map(fn($k) => "{$k} = ?", array_keys($data)));
+        $set  = implode(', ', array_map(fn($k) => $this->quoteIdentifier((string) $k) . " = ?", array_keys($data)));
         $sql  = "UPDATE {$this->table} SET {$set}" . $this->buildWhere();
         return $this->run($sql, [...array_values($data), ...$this->bindings])->rowCount();
     }
@@ -218,6 +227,18 @@ class QueryBuilder
     private function buildWhere(): string
     {
         return $this->wheres ? ' WHERE ' . implode(' ', $this->wheres) : '';
+    }
+
+    private function quoteIdentifier(string $identifier): string
+    {
+        if ($identifier === '*' || str_contains($identifier, '(') || str_contains($identifier, ' ')) {
+            return $identifier;
+        }
+
+        return implode('.', array_map(
+            fn($part) => '`' . str_replace('`', '``', $part) . '`',
+            explode('.', $identifier)
+        ));
     }
 
     private function run(string $sql, array $bindings = []): \PDOStatement

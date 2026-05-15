@@ -37,9 +37,9 @@ class CarController extends Controller
         if (!empty($_GET['min_price'])) {
             $query = $query->where('cars.daily_rate', '>=', (float) $_GET['min_price']);
         }
-        if (!empty($_GET['status'])) {
+        if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
             $query = $query->where('cars.status', $_GET['status']);
-        } else {
+        } elseif (($_GET['status'] ?? '') !== 'all') {
             // Default: only show available cars to guests
             if (empty($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
                 $query = $query->where('cars.status', 'available');

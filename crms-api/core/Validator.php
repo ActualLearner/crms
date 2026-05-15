@@ -74,7 +74,7 @@ class Validator
                 ? "{$label} must be a valid date (YYYY-MM-DD)"
                 : null,
 
-            'in' => (!empty($value) && !in_array($value, explode(',', $param ?? ''), true))
+            'in' => (!empty($value) && !in_array((string) $value, array_map(static fn ($item) => trim((string) $item), explode(',', $param ?? '')), true))
                 ? "{$label} must be one of: {$param}"
                 : null,
 

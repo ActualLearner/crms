@@ -26,24 +26,26 @@
 	}
 
 	function renderCars(cars) {
-		const unavailable = cars.filter(car => car.status !== 'available');
-		if (!unavailable.length) {
-			waitlistCars.innerHTML = '<div class="flow-alert">No saved unavailable cars. Save an unavailable vehicle or join from its detail page.</div>';
+		if (!cars.length) {
+			waitlistCars.innerHTML = '<div class="flow-alert">You are not waiting for any vehicles yet. Open an unavailable car and choose Join waitlist.</div>';
 			return;
 		}
-		waitlistCars.innerHTML = unavailable.map(car => `
+		waitlistCars.innerHTML = cars.map(car => {
+			const available = car.status === 'available' || Number(car.notified) === 1;
+			return `
 			<article class="waitlist-item">
 				<div class="flow-thumb">${F.image(car)}</div>
 				<div>
 					<strong>${F.escapeHtml(car.brand)} ${F.escapeHtml(car.model)}</strong>
-					<p class="flow-muted">${F.escapeHtml(car.category || 'Vehicle')} · ${F.money(car.daily_rate)} / day</p>
+					<p class="flow-muted">${F.escapeHtml(car.category || 'Vehicle')} · ${F.money(car.daily_rate)} / day · ${F.escapeHtml(car.status)}</p>
 				</div>
 				<div class="flow-actions">
-					<button class="flow-button primary" type="button" data-join="${car.id}">Join</button>
-					<button class="flow-button danger" type="button" data-leave="${car.id}">Leave</button>
+					${available ? `<a class="flow-button primary" href="./car-detail.html?id=${car.car_id}&book=1">Book now</a>` : '<span class="flow-badge">Waiting</span>'}
+					<button class="flow-button danger" type="button" data-leave="${car.car_id}">Leave</button>
 				</div>
 			</article>
-		`).join('');
+		`;
+		}).join('');
 	}
 
 	async function init() {
@@ -60,19 +62,13 @@
 	}
 
 	waitlistCars?.addEventListener('click', async event => {
-		const join = event.target.closest('[data-join]');
 		const leave = event.target.closest('[data-leave]');
-		const btn = join || leave;
+		const btn = leave;
 		if (!btn) return;
 		btn.disabled = true;
 		try {
-			if (join) {
-				await window.API.joinWaitlist(join.dataset.join);
-				btn.textContent = 'Joined';
-			} else {
-				await window.API.leaveWaitlist(leave.dataset.leave);
-				btn.textContent = 'Left';
-			}
+			await window.API.leaveWaitlist(leave.dataset.leave);
+			btn.textContent = 'Left';
 			await init();
 		} catch (error) {
 			window.alert(error.message || 'Unable to update waitlist.');

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Admin Damage Reports</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+</head>
+<body>
+  <div class="admin-shell" data-page="damage-reports">
+    <header class="admin-topbar">
+      <a class="admin-brand" href="./dashboard.html"><span class="admin-brand-mark"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="admin-brand-text">Auto<br>Ultimate</span></a>
+      <span class="admin-section-label">Admin</span>
+      <nav class="admin-nav" data-admin-nav aria-label="Admin navigation"></nav>
+      <div class="admin-topbar-actions"><button class="admin-icon-btn" data-admin-menu type="button" aria-label="Toggle navigation"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><button class="admin-btn" data-logout type="button">Logout</button><span class="admin-avatar">AD</span></div>
+    </header>
+
+    <main class="admin-page">
+      <div class="admin-page-header">
+        <div><h1>Damage reports</h1><p>Resolve reports to return vehicles to available</p></div>
+      </div>
+
+      <section class="admin-stats-grid">
+        <article class="admin-stat-card"><span>Total reports</span><strong id="reports-total">0</strong></article>
+        <article class="admin-stat-card"><span>Open reports</span><strong id="reports-open">0</strong></article>
+        <article class="admin-stat-card"><span>Resolved reports</span><strong id="reports-resolved">0</strong></article>
+        <article class="admin-stat-card"><span>Needs action</span><strong id="reports-needs-action">0</strong></article>
+      </section>
+
+      <section class="admin-filters">
+        <div class="admin-segmented" data-report-tabs>
+          <button class="admin-chip active" data-status="all">All</button>
+          <button class="admin-chip" data-status="open">Open</button>
+          <button class="admin-chip" data-status="resolved">Resolved</button>
+        </div>
+        <input id="report-search" class="admin-input" type="search" placeholder="Search vehicle, customer or description..." />
+      </section>
+
+      <section class="admin-panel">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>ID</th><th>Vehicle</th><th>Customer</th><th>Description</th><th>Repair cost</th><th>Reported</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="damage-reports-table"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../js/pages/admin-common.js"></script>
+  <script src="../../js/pages/admin-damage-reports.js"></script>
+</body>
+</html>

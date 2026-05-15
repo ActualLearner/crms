@@ -2,6 +2,7 @@ window.AdminUI = (() => {
 	const navItems = [
 		['dashboard.html', 'Dashboard', 'M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z'],
 		['bookings.html', 'Bookings', 'M7 3v3 M17 3v3 M4 8h16 M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2z'],
+		['damage-reports.html', 'Damage reports', 'M4 6h16 M4 12h16 M4 18h10 M18 16l3 3 M21 19l-3 3'],
 		['fleet.html', 'Fleet', 'M5 16h14l-1.4-5A3 3 0 0 0 14.7 9H9.3a3 3 0 0 0-2.9 2L5 16z M7 16v2 M17 16v2'],
 		['customers.html', 'Customers', 'M20 21a8 8 0 0 0-16 0 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'],
 		['promos.html', 'Promo codes', 'M19 5 5 19 M7 7h.01 M17 17h.01 M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],

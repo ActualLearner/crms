@@ -62,9 +62,7 @@
 			max_price: data.get('max_price') || '',
 		};
 
-		if (data.get('status')) {
-			params.status = 'available';
-		}
+		params.status = data.get('status') ? 'available' : 'all';
 
 		return params;
 	}
@@ -131,20 +129,16 @@
 			const isFavourite = state.favourites.has(Number(car.id));
 			const rating = Number(car.average_rating || 0);
 			const reviews = Number(car.review_count || 0);
+			const unavailable = car.status !== 'available';
+			const reserveHref = unavailable ? `./car-detail.html?id=${car.id}` : `./car-detail.html?id=${car.id}&book=1`;
+			const reserveText = unavailable ? 'Join waitlist' : 'Reserve';
 
 			return `
 				<article class="vehicle-card fade-up-soft">
-					<div class="vehicle-card-top">
-						<div class="vehicle-meta">
-							<span>${car.seats || 4} seats</span>
-							<span class="rating">★ ${rating.toFixed(1)} (${reviews})</span>
-						</div>
-						<button class="favourite-button ${isFavourite ? 'active' : ''}" type="button" data-favourite="${car.id}" aria-label="${isFavourite ? 'Remove from' : 'Add to'} favourites">
-							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.6a5.5 5.5 0 0 0-9.1-3.9L12 5l.3-.3a5.5 5.5 0 0 1 7.8 7.8L12 20.5l-8.1-8a5.5 5.5 0 0 1 7.8-7.8L12 5"></path></svg>
-						</button>
-					</div>
 					<a class="vehicle-media" href="./car-detail.html?id=${car.id}" aria-label="View ${safeName}">
 						${carImage(car)}
+						<span class="vehicle-seat-chip">${car.seats || 4} seats</span>
+						<span class="vehicle-status-chip ${escapeHtml(car.status)}">${escapeHtml(car.status)}</span>
 					</a>
 					<div class="vehicle-body">
 						<div class="vehicle-title-row">
@@ -154,9 +148,15 @@
 							</div>
 							<div class="vehicle-price">${window.UIUtils.formatMoney(car.daily_rate)} <span>/ day</span></div>
 						</div>
+						<div class="vehicle-card-meta">
+							<span class="rating">★ ${rating.toFixed(1)} (${reviews})</span>
+							<button class="favourite-button ${isFavourite ? 'active' : ''}" type="button" data-favourite="${car.id}" aria-label="${isFavourite ? 'Remove from' : 'Add to'} favourites">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.6a5.5 5.5 0 0 0-9.1-3.9L12 5l.3-.3a5.5 5.5 0 0 1 7.8 7.8L12 20.5l-8.1-8a5.5 5.5 0 0 1 7.8-7.8L12 5"></path></svg>
+							</button>
+						</div>
 						<div class="vehicle-actions">
 							<a class="btn-secondary" href="./car-detail.html?id=${car.id}">View details</a>
-							<a class="btn-quiet" href="./car-detail.html?id=${car.id}&book=1">Reserve</a>
+							<a class="btn-quiet" href="${reserveHref}">${reserveText}</a>
 						</div>
 					</div>
 				</article>
