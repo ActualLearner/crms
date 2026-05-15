@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: crms
+      MYSQL_USER: crms_user
+      MYSQL_PASSWORD: crms_password
+    volumes:
+      - crms_db:/var/lib/mysql
+
+  api:
+    build:
+      context: .
+      dockerfile: crms-api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      APP_ENV: production
+      ALLOWED_ORIGIN: http://localhost:8080
+      DB_HOST: db
+      DB_NAME: crms
+      DB_USER: crms_user
+      DB_PASS: crms_password
+      RATE_LIMIT: 5
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - crms_uploads:/var/www/html/public/uploads
+
+  frontend:
+    build:
+      context: .
+      dockerfile: crms-frontend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+volumes:
+  crms_db:
+  crms_uploads:

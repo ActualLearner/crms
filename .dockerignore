@@ -1,0 +1,10 @@
+.git
+.github
+.vscode
+crms-api/.env
+crms-api/database/*.sqlite
+**/.DS_Store
+**/node_modules
+**/dist
+**/build
+**/*.log

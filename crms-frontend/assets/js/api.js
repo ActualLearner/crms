@@ -2,7 +2,9 @@
 	const configuredBaseUrl =
 		window.CRMS_API_BASE_URL ||
 		localStorage.getItem('CRMS_API_BASE_URL') ||
-		'http://127.0.0.1:8082';
+		((window.location.protocol === 'http:' || window.location.protocol === 'https:')
+			? `${window.location.origin}/api`
+			: 'http://127.0.0.1:8082');
 
 	async function request(path, options = {}) {
 		const isFormData = options.body instanceof FormData;

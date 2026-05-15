@@ -10,6 +10,11 @@ function env(string $key, mixed $default = null): mixed
 {
     static $cache = [];
 
+    $systemValue = $_ENV[$key] ?? getenv($key);
+    if ($systemValue !== false && $systemValue !== null && $systemValue !== '') {
+        return $systemValue;
+    }
+
     if (empty($cache)) {
         $file = ROOT . '/.env';
         if (!file_exists($file)) {
