@@ -108,12 +108,7 @@
         const canReview = booking.status === 'completed';
 
         if (canExtend) {
-            return `
-                <div class="extend-inline">
-                    <input type="date" data-extend-date="${booking.id}" min="${booking.end_date}" aria-label="New return date" />
-                    <button class="btn-quiet" type="button" data-extend="${booking.id}">Extend</button>
-                </div>
-            `;
+            return `<a class="btn-quiet" href="./extend-booking.html?booking_id=${booking.id}">Extend</a>`;
         }
 
         if (canCancel) {
@@ -124,7 +119,7 @@
         }
 
         if (canReview) {
-            return `<a class="btn-quiet" href="./car-detail.html?id=${booking.car_id}&booking_id=${booking.id}">Leave review</a>`;
+            return `<a class="btn-quiet" href="./review.html?booking_id=${booking.id}">Leave review</a>`;
         }
 
         // FIX 4: was unreachable inside the canReview block; now reachable as default
@@ -238,7 +233,6 @@
 
         list.addEventListener('click', async (event) => {
             const cancelButton = event.target.closest('[data-cancel]');
-            const extendButton = event.target.closest('[data-extend]');
 
             if (cancelButton) {
                 if (!window.confirm('Cancel this booking?')) {
@@ -254,21 +248,6 @@
                 }
             }
 
-            if (extendButton) {
-                const dateInput = document.querySelector(`[data-extend-date="${extendButton.dataset.extend}"]`);
-                if (!dateInput?.value) {
-                    window.alert('Choose a new return date first.');
-                    return;
-                }
-                extendButton.disabled = true;
-                try {
-                    await window.API.extendBooking(extendButton.dataset.extend, dateInput.value);
-                    await loadBookings();
-                } catch (error) {
-                    window.alert(error.message || 'Unable to extend booking.');
-                    extendButton.disabled = false;
-                }
-            }
         });
 
         pagination.addEventListener('click', (event) => {

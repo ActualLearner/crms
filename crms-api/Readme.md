@@ -1255,6 +1255,8 @@ GET /cars?page=2
 | POST | `/waitlist/:carId` | auth | Join waitlist |
 | DELETE | `/waitlist/:carId` | auth | Leave waitlist |
 
+Note: the customer frontend has dedicated pages for waitlist notifications, review submission, and booking extension. Review submission is backed by `POST /bookings/:id/review`. Booking extension is backed by `PUT /bookings/:id/extend`, but the backend currently accepts only `active` bookings. Waitlist join/leave is backed by `POST /waitlist/:carId` and `DELETE /waitlist/:carId`; a full waitlist page or notification inbox would need an endpoint such as `GET /waitlist/mine` because `/auth/me` only exposes a single current waitlist notification.
+
 ### Promos
 
 | Method | Endpoint | Auth | Description |
@@ -1275,6 +1277,8 @@ GET /cars?page=2
 | GET | `/damage-reports` | admin | All damage reports |
 | POST | `/damage-reports` | admin | Create damage report |
 | PUT | `/damage-reports/:id/resolve` | admin | Resolve damage report |
+
+Note: the admin frontend currently computes customer summary counts such as verified, pending verification, and currently renting from the loaded customer page plus `/admin/customers/:id` detail hydration. The `/admin/customers` endpoint does not expose aggregate customer counts yet.
 
 ### AI
 

@@ -8,6 +8,7 @@
 
     function imageSrc(imageUrl) {
         if (!imageUrl) return placeholder;
+        if (window.API?.resolveUrl) return window.API.resolveUrl(imageUrl);
         return imageUrl.startsWith('http') ? imageUrl : API_BASE + imageUrl;
     }
 
@@ -203,6 +204,7 @@
 
     // ── Boot ────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+        window.AdminUI?.init('fleet');
         loadFleet();
 
         const addVehicleModal = document.getElementById('add-vehicle-modal');
@@ -225,26 +227,6 @@
                 try { await window.API.logout(); } finally {
                     window.location.replace('../auth/login.html');
                 }
-            });
-        }
-
-        // Filter toggle for mobile
-        const filterToggle = document.getElementById('filter-toggle');
-        const filtersBar = document.querySelector('.filters-bar');
-        if (filterToggle && filtersBar) {
-            filterToggle.addEventListener('click', () => {
-                filtersBar.classList.toggle('filters-open');
-                filterToggle.setAttribute('aria-pressed', filtersBar.classList.contains('filters-open'));
-            });
-        }
-
-        // Navigation toggle for mobile
-        const navToggle = document.getElementById('nav-toggle');
-        const appShell = document.querySelector('.app-shell');
-        if (navToggle && appShell) {
-            navToggle.addEventListener('click', () => {
-                appShell.classList.toggle('nav-open');
-                navToggle.setAttribute('aria-pressed', appShell.classList.contains('nav-open'));
             });
         }
 

@@ -1,2 +1,53 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>CRMS - Customers</title></head><body><main><h1>Customers</h1><p>Customer table + stats (page 4).</p></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Customers</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+</head>
+<body>
+  <div class="admin-shell" data-page="customers">
+    <header class="admin-topbar">
+      <a class="admin-brand" href="./dashboard.html"><span class="admin-brand-mark"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="admin-brand-text">Auto<br>Ultimate</span></a>
+      <span class="admin-section-label">Admin</span>
+      <nav class="admin-nav" data-admin-nav aria-label="Admin navigation"></nav>
+      <div class="admin-topbar-actions"><button class="admin-icon-btn" data-admin-menu type="button" aria-label="Toggle navigation"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><button class="admin-btn" data-logout type="button">Logout</button><span class="admin-avatar">AD</span></div>
+    </header>
+    <main class="admin-page">
+      <div class="admin-page-header">
+        <div><h1>Customers</h1><p>Manage accounts and license verification</p></div>
+        <button class="admin-btn primary" type="button" data-export-customers>Export CSV</button>
+      </div>
+      <section class="admin-stats-grid">
+        <article class="admin-stat-card"><span>Total customers</span><strong id="customers-total">0</strong></article>
+        <article class="admin-stat-card"><span>License verified</span><strong id="customers-verified" class="tone-success">0</strong></article>
+        <article class="admin-stat-card"><span>Pending verification</span><strong id="customers-pending" class="tone-warning">0</strong></article>
+        <article class="admin-stat-card"><span>Currently renting</span><strong id="customers-renting">0</strong></article>
+      </section>
+      <section class="admin-filters">
+        <div class="admin-segmented" data-customer-tabs>
+          <button class="admin-chip active" data-filter="all">All</button>
+          <button class="admin-chip" data-filter="verified">Verified</button>
+          <button class="admin-chip" data-filter="pending">Pending</button>
+          <button class="admin-chip" data-filter="renting">Renting now</button>
+        </div>
+        <input id="customer-search" class="admin-input" type="search" placeholder="Search name or email..." />
+      </section>
+      <section class="admin-panel">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Customer</th><th>Email</th><th>Joined</th><th>Rentals</th><th>Total spent</th><th>License</th><th>Actions</th></tr></thead>
+            <tbody id="customers-table"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../js/pages/admin-common.js"></script>
+  <script src="../../js/pages/admin-customers.js"></script>
+</body>
+</html>
