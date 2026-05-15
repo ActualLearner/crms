@@ -7,6 +7,30 @@ require_once ROOT . '/models/Car.php';
 
 class WaitlistController extends Controller
 {
+    // GET /waitlist/mine
+    public function mine(): void
+    {
+        $items = DB::table('waitlist')
+            ->select([
+                'waitlist.id as waitlist_id',
+                'waitlist.car_id',
+                'waitlist.notified',
+                'waitlist.created_at',
+                'cars.brand',
+                'cars.model',
+                'cars.category',
+                'cars.daily_rate',
+                'cars.status',
+                'cars.image_url',
+            ])
+            ->join('cars', 'waitlist.car_id', 'cars.id')
+            ->where('waitlist.user_id', $this->userId())
+            ->orderBy('waitlist.created_at', 'DESC')
+            ->get();
+
+        $this->success($items);
+    }
+
     // POST /waitlist/:carId
     public function store(string $carId): void
     {

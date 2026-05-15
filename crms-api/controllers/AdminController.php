@@ -51,10 +51,13 @@ class AdminController extends Controller
         // Recent bookings (last 5)
         $recentBookings = DB::table('bookings')
             ->select([
-                'bookings.reference_number', 'bookings.status',
-                'bookings.final_total', 'bookings.created_at',
+                'bookings.reference_number',
+                'bookings.status',
+                'bookings.final_total',
+                'bookings.created_at',
                 'users.name as customer_name',
-                'cars.brand', 'cars.model',
+                'cars.brand',
+                'cars.model',
             ])
             ->join('users', 'bookings.user_id', 'users.id')
             ->join('cars', 'bookings.car_id', 'cars.id')
@@ -91,8 +94,16 @@ class AdminController extends Controller
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
         $query = DB::table('users')
-            ->select(['id', 'name', 'email', 'phone', 'license_number',
-                       'license_verified', 'role', 'created_at'])
+            ->select([
+                'id',
+                'name',
+                'email',
+                'phone',
+                'license_number',
+                'license_verified',
+                'role',
+                'created_at'
+            ])
             ->where('role', 'customer')
             ->orderBy('created_at', 'DESC');
 
@@ -100,15 +111,88 @@ class AdminController extends Controller
             $query = $query->where('name', 'LIKE', '%' . $_GET['search'] . '%');
         }
 
-        $this->success($query->paginate(15, $page));
+        $payload = $query->paginate(15, $page);
+        $customerIds = array_values(array_filter(array_map(
+            fn(array $customer) => (int) ($customer['id'] ?? 0),
+            $payload['data']
+        )));
+
+        $customerStats = [];
+        if (!empty($customerIds)) {
+            $customerStatsRows = DB::table('bookings')
+                ->select([
+                    'user_id',
+                    'COUNT(*) as booking_count',
+                    'COALESCE(SUM(CASE WHEN status = "completed" THEN final_total ELSE 0 END), 0) as total_spent',
+                    'MAX(CASE WHEN status IN ("active", "confirmed") THEN 1 ELSE 0 END) as currently_renting',
+                ])
+                ->whereIn('user_id', $customerIds)
+                ->groupBy('user_id')
+                ->get();
+
+            foreach ($customerStatsRows as $row) {
+                $customerStats[(int) $row['user_id']] = [
+                    'booking_count' => (int) ($row['booking_count'] ?? 0),
+                    'total_spent' => (float) ($row['total_spent'] ?? 0),
+                    'currently_renting' => (int) ($row['currently_renting'] ?? 0) === 1,
+                ];
+            }
+        }
+
+        $payload['data'] = array_map(
+            function (array $customer) use ($customerStats): array {
+                $stats = $customerStats[(int) $customer['id']] ?? [
+                    'booking_count' => 0,
+                    'total_spent' => 0,
+                    'currently_renting' => false,
+                ];
+
+                return array_merge($customer, $stats);
+            },
+            $payload['data']
+        );
+
+        $verifiedCustomers = DB::table('users')
+            ->where('role', 'customer')
+            ->where('license_verified', 1)
+            ->count();
+
+        $pendingCustomers = DB::table('users')
+            ->where('role', 'customer')
+            ->where('license_verified', 0)
+            ->count();
+
+        $currentlyRenting = DB::table('bookings')
+            ->select(['COUNT(DISTINCT bookings.user_id) as total'])
+            ->join('users', 'bookings.user_id', 'users.id')
+            ->where('users.role', 'customer')
+            ->whereIn('bookings.status', ['active', 'confirmed'])
+            ->first();
+
+        $payload = $query->paginate(15, $page);
+        $payload['stats'] = [
+            'verified' => $verifiedCustomers,
+            'pending' => $pendingCustomers,
+            'renting' => (int) ($currentlyRenting['total'] ?? 0),
+        ];
+
+        $this->success($payload);
     }
 
     // GET /admin/customers/:id
     public function showCustomer(string $id): void
     {
         $user = DB::table('users')
-            ->select(['id', 'name', 'email', 'phone', 'license_number',
-                       'license_verified', 'role', 'created_at'])
+            ->select([
+                'id',
+                'name',
+                'email',
+                'phone',
+                'license_number',
+                'license_verified',
+                'role',
+                'created_at'
+            ])
             ->where('id', (int) $id)
             ->where('role', 'customer')
             ->first();

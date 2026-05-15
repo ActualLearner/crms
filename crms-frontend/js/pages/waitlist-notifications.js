@@ -52,7 +52,7 @@
 		F.logout();
 		renderNotifications(user);
 		try {
-			const res = await window.API.favourites();
+			const res = await window.API.waitlistMine();
 			renderCars(res.data || []);
 		} catch (error) {
 			waitlistCars.innerHTML = `<div class="flow-alert danger">${F.escapeHtml(error.message || 'Unable to load saved cars.')}</div>`;
@@ -73,6 +73,7 @@
 				await window.API.leaveWaitlist(leave.dataset.leave);
 				btn.textContent = 'Left';
 			}
+			await init();
 		} catch (error) {
 			window.alert(error.message || 'Unable to update waitlist.');
 			btn.disabled = false;

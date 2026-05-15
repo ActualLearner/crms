@@ -36,6 +36,7 @@ Router::get('/favourites',                     'FavouriteController@index',     
 Router::post('/favourites/:carId',             'FavouriteController@store',      'auth');
 Router::delete('/favourites/:carId',           'FavouriteController@destroy',    'auth');
 
+Router::get('/waitlist/mine',                  'WaitlistController@mine',       'auth');
 Router::post('/waitlist/:carId',               'WaitlistController@store',       'auth');
 Router::delete('/waitlist/:carId',             'WaitlistController@destroy',     'auth');
 
