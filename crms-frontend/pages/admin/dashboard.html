@@ -1,2 +1,102 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>CRMS - Admin Dashboard</title></head><body><main><h1>Admin Dashboard</h1><p>Stats and charts (page 16).</p></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Admin Dashboard</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+</head>
+<body>
+  <div class="admin-shell" data-page="dashboard">
+    <header class="admin-topbar">
+      <a class="admin-brand" href="./dashboard.html" aria-label="Auto Ultimate admin">
+        <span class="admin-brand-mark"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        <span class="admin-brand-text">Auto<br>Ultimate</span>
+      </a>
+      <span class="admin-section-label">Admin</span>
+      <nav class="admin-nav" data-admin-nav aria-label="Admin navigation"></nav>
+      <div class="admin-topbar-actions">
+        <button class="admin-icon-btn" data-admin-menu type="button" aria-label="Toggle navigation"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <button class="admin-btn" data-logout type="button">Logout</button>
+        <span class="admin-avatar">AD</span>
+      </div>
+    </header>
+
+    <main class="admin-page">
+      <div class="admin-page-header">
+        <div>
+          <h1>Good morning, Admin</h1>
+          <p id="dashboard-date">Fleet, booking, and revenue overview</p>
+        </div>
+        <div class="admin-actions">
+          <select class="admin-select" aria-label="Report range">
+            <option>Last 30 days</option>
+            <option>Last 90 days</option>
+          </select>
+          <button class="admin-btn primary" type="button" data-export-dashboard>Export report</button>
+        </div>
+      </div>
+
+      <section class="admin-stats-grid" aria-label="Dashboard stats">
+        <article class="admin-stat-card"><span>Total revenue</span><strong id="stat-revenue">$0</strong><small class="tone-success">↗ live total</small></article>
+        <article class="admin-stat-card"><span>Active bookings</span><strong id="stat-active">0</strong><small class="tone-success">currently moving</small></article>
+        <article class="admin-stat-card"><span>Fleet utilization</span><strong id="stat-utilization">0%</strong><small><span id="stat-util-detail">0/0 cars</span></small></article>
+        <article class="admin-stat-card"><span>Pending confirmation</span><strong id="stat-pending">0</strong><small class="tone-warning">needs review</small></article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="admin-panel chart-panel">
+          <h2>Revenue over time</h2>
+          <svg class="line-chart" viewBox="0 0 520 220" preserveAspectRatio="none" aria-label="Revenue trend">
+            <g stroke="hsl(0 0% 90%)" stroke-width="1">
+              <path d="M0 40H520M0 85H520M0 130H520M0 175H520"/>
+            </g>
+            <path id="revenue-line" d="M0 180 C35 120 58 156 90 100 S145 80 170 112 235 52 268 72 325 38 360 58 430 32 520 36" fill="none" stroke="hsl(220 8% 30%)" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </article>
+
+        <article class="admin-panel chart-panel">
+          <h2>Fleet status</h2>
+          <p><span id="fleet-total-copy">0</span> vehicles total</p>
+          <div class="donut-wrap">
+            <div class="donut" id="fleet-donut" style="--rented: 0%; --available: 0%"></div>
+            <div class="legend">
+              <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="--swatch: var(--brand-dark)"></span>Rented</span><strong id="legend-rented">0</strong></div>
+              <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="--swatch: hsl(145 56% 48%)"></span>Available</span><strong id="legend-available">0</strong></div>
+              <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="--swatch: hsl(38 84% 52%)"></span>Maintenance</span><strong id="legend-maintenance">0</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="admin-panel chart-panel">
+          <h2>Most rented cars</h2>
+          <div class="bar-list" id="top-cars"></div>
+        </article>
+
+        <article class="admin-panel chart-panel">
+          <h2>Busiest booking hours</h2>
+          <div class="bar-list" id="booking-hours"></div>
+        </article>
+      </section>
+
+      <section class="admin-panel">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">Recent bookings</h2>
+          <a class="admin-btn" href="./bookings.html">View all</a>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Customer</th><th>Vehicle</th><th>Created</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody id="recent-bookings"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../js/pages/admin-common.js"></script>
+  <script src="../../js/pages/admin-dashboard.js"></script>
+</body>
+</html>

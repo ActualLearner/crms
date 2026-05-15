@@ -1,2 +1,41 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>CRMS - Customer Detail</title></head><body><main><h1>Customer Detail</h1><p>Customer profile + rental history (page 13).</p></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Customer Detail</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+</head>
+<body>
+  <div class="admin-shell" data-page="customers">
+    <header class="admin-topbar">
+      <a class="admin-brand" href="./dashboard.html"><span class="admin-brand-mark"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="admin-brand-text">Auto<br>Ultimate</span></a>
+      <span class="admin-section-label">Admin</span>
+      <nav class="admin-nav" data-admin-nav aria-label="Admin navigation"></nav>
+      <div class="admin-topbar-actions"><button class="admin-icon-btn" data-admin-menu type="button" aria-label="Toggle navigation"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><button class="admin-btn" data-logout type="button">Logout</button><span class="admin-avatar">AD</span></div>
+    </header>
+    <main class="admin-page">
+      <div class="admin-page-header">
+        <div><p><a href="./customers.html">Customers</a> › <span id="crumb-name">Customer</span></p><h1 id="detail-title">Customer detail</h1></div>
+      </div>
+      <section class="customer-detail-layout">
+        <aside class="customer-profile-card" id="customer-profile"></aside>
+        <section class="admin-panel">
+          <div class="admin-panel-header"><h2 class="admin-panel-title">Rental history</h2><div class="admin-segmented"><button class="admin-chip active">All</button></div></div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Ref</th><th>Vehicle</th><th>Status</th><th>Pick-up</th><th>Return</th><th>Days</th><th>Total</th></tr></thead>
+              <tbody id="customer-history"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../js/pages/admin-common.js"></script>
+  <script src="../../js/pages/admin-customer-detail.js"></script>
+</body>
+</html>
