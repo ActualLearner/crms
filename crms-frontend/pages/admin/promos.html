@@ -1,2 +1,56 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>CRMS - Promos</title></head><body><main><h1>Promos</h1><p>Promo cards + create modal (page 12).</p></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Promo Codes</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+</head>
+<body>
+  <div class="admin-shell" data-page="promos">
+    <header class="admin-topbar">
+      <a class="admin-brand" href="./dashboard.html"><span class="admin-brand-mark"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="admin-brand-text">Auto<br>Ultimate</span></a>
+      <span class="admin-section-label">Admin</span>
+      <nav class="admin-nav" data-admin-nav aria-label="Admin navigation"></nav>
+      <div class="admin-topbar-actions"><button class="admin-icon-btn" data-admin-menu type="button" aria-label="Toggle navigation"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><button class="admin-btn" data-logout type="button">Logout</button><span class="admin-avatar">AD</span></div>
+    </header>
+    <main class="admin-page">
+      <div class="admin-page-header">
+        <div><h1>Promo codes</h1><p>Create and manage discount codes</p></div>
+        <button class="admin-btn primary" type="button" data-open-promo><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Create code</button>
+      </div>
+      <section class="admin-stats-grid">
+        <article class="admin-stat-card"><span>Total codes</span><strong id="promo-total">0</strong></article>
+        <article class="admin-stat-card"><span>Active</span><strong id="promo-active" class="tone-success">0</strong></article>
+        <article class="admin-stat-card"><span>Total uses</span><strong id="promo-uses">0</strong></article>
+        <article class="admin-stat-card"><span>Savings given</span><strong id="promo-savings">$0</strong></article>
+      </section>
+      <section class="admin-filters">
+        <div class="admin-segmented" data-promo-tabs><button class="admin-chip active" data-filter="all">All</button><button class="admin-chip" data-filter="active">Active</button><button class="admin-chip" data-filter="inactive">Inactive</button></div>
+        <input id="promo-search" class="admin-input" type="search" placeholder="Search code..." />
+      </section>
+      <section class="promo-grid" id="promo-grid"></section>
+    </main>
+  </div>
+  <dialog class="admin-modal" id="promo-modal">
+    <form id="promo-form">
+      <div class="admin-modal-header"><h2>Create promo code</h2><button class="admin-btn" type="button" data-close-promo>Close</button></div>
+      <div class="admin-modal-body">
+        <div class="form-grid">
+          <div class="field"><label for="promo-code">Code</label><input id="promo-code" name="code" class="admin-input" required maxlength="30" placeholder="SAVE20" /></div>
+          <div class="field"><label for="promo-discount">Discount %</label><input id="promo-discount" name="discount_percentage" class="admin-input" type="number" min="1" max="100" required /></div>
+          <div class="field"><label for="promo-from">Valid from</label><input id="promo-from" name="valid_from" class="admin-input" type="date" required /></div>
+          <div class="field"><label for="promo-until">Valid until</label><input id="promo-until" name="valid_until" class="admin-input" type="date" required /></div>
+          <div class="field"><label for="promo-max">Max uses</label><input id="promo-max" name="max_uses" class="admin-input" type="number" min="1" required /></div>
+        </div>
+      </div>
+      <div class="admin-modal-actions"><button class="admin-btn" type="button" data-close-promo>Cancel</button><button class="admin-btn primary" type="submit">Create code</button></div>
+    </form>
+  </dialog>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../js/pages/admin-common.js"></script>
+  <script src="../../js/pages/admin-promos.js"></script>
+</body>
+</html>
