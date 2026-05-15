@@ -137,6 +137,9 @@
 		joinWaitlist(carId) {
                         return request(`/waitlist/${carId}`, { method: 'POST' });
                 },
+                leaveWaitlist(carId) {
+                        return request(`/waitlist/${carId}`, { method: 'DELETE' });
+                },
                 submitReview(bookingId, rating, comment) {
                         return request(`/bookings/${bookingId}/review`, {
                                 method: 'POST',

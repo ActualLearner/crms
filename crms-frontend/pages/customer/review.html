@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRMS - Leave a Review</title>
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/reset.css" />
+  <link rel="stylesheet" href="../../assets/css/components.css" />
+  <link rel="stylesheet" href="../../assets/css/animations.css" />
+  <link rel="stylesheet" href="../../assets/css/layout.css" />
+</head>
+<body>
+  <div class="app-shell" data-page="review">
+    <header class="app-topbar">
+      <a class="app-brand" href="./vehicles.html" aria-label="Auto Ultimate home"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15.5 15.5 4H20v4.5L8.5 20H4v-4.5Z"></path></svg></span><span class="brand-text"><span>AUTO</span><span>ULTIMATE</span></span></a>
+      <div class="topbar-user" aria-label="Account"><span class="topbar-user-circle" data-user-initials></span></div>
+    </header>
+    <aside class="customer-nav" aria-label="Customer navigation">
+      <a class="nav-item" href="./vehicles.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14l-1.3-5.2A3 3 0 0 0 14.8 9H9.2a3 3 0 0 0-2.9 2.8L5 17Z"></path><path d="M7 17v2"></path><path d="M17 17v2"></path><path d="M8 13h8"></path></svg><span>Vehicles</span></a>
+      <a class="nav-item active" href="./bookings.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg><span>Bookings</span></a>
+      <a class="nav-item" href="./favourites.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span>Favourites</span></a>
+      <a class="nav-item" href="./waitlist-notifications.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg><span>Waitlist</span></a>
+      <a class="nav-item" href="./profile.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Profile</span></a>
+      <button class="nav-item nav-button" type="button" data-logout><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17 15 12l-5-5"></path><path d="M15 12H3"></path><path d="M21 3v18"></path></svg><span>Sign out</span></button>
+    </aside>
+    <main class="customer-flow-page">
+      <section class="flow-header"><div><h1>Leave a review</h1><p>Share how the rental went after a completed booking.</p></div></section>
+      <form class="flow-card" data-review-form>
+        <div data-booking-strip></div>
+        <div class="flow-field">
+          <label>Overall rating</label>
+          <div class="flow-stars" data-stars aria-label="Overall rating"></div>
+          <p class="flow-muted" data-rating-label>Tap to rate</p>
+        </div>
+        <div class="flow-field">
+          <label>Category ratings</label>
+          <div class="rating-rows" data-category-ratings></div>
+        </div>
+        <div class="flow-field">
+          <label for="review-comment">Your review</label>
+          <textarea class="flow-textarea" id="review-comment" maxlength="500" placeholder="What did you love? Anything to improve?"></textarea>
+          <p class="flow-muted"><span data-review-count>0</span> / 500</p>
+        </div>
+        <div class="flow-alert">Reviews are public and appear on the car detail page.</div>
+        <div class="flow-actions"><a class="flow-button" href="./bookings.html">Back</a><button class="flow-button primary" type="submit">Submit review</button></div>
+      </form>
+    </main>
+  </div>
+  <script src="../../assets/js/api.js" defer></script>
+  <script src="../../assets/js/state.js" defer></script>
+  <script src="../../assets/js/utils.js" defer></script>
+  <script src="../../js/pages/customer-flow-utils.js" defer></script>
+  <script src="../../js/pages/review.js" defer></script>
+</body>
+</html>
