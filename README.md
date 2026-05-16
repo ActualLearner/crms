@@ -240,10 +240,11 @@ docker-compose up -d
 ```bash
 cd crms-api
 
-# PHP with built-in server
-php -S localhost:3000
+# PHP built-in server (does not process .htaccess rewrite rules)
+# Access the API via index.php directly, or use index.php as the router script:
+php -S localhost:3000 index.php
 
-# Or use Apache/Nginx with .htaccess
+# Alternatively, use Apache/Nginx; .htaccess is only honored by Apache
 ```
 
 **Frontend:**
