@@ -1,102 +1,477 @@
-# Miniframe
+# CRMS - Car Rental Management System
 
-> A minimal, dependency-free PHP micro-framework built for the CRMS Car Rental API.  
-> Pure PHP 8.1+ · No Composer · No third-party libraries · SQLite or MySQL
-
----
-
-## Table of Contents
-
-1. [Introduction](#1-introduction)
-2. [Project Structure](#2-project-structure)
-3. [Getting Started](#3-getting-started)
-4. [Configuration](#4-configuration)
-5. [Routing](#5-routing)
-6. [Controllers](#6-controllers)
-7. [Models](#7-models)
-8. [Query Builder](#8-query-builder)
-9. [Validation](#9-validation)
-10. [Middleware](#10-middleware)
-11. [Database & Transactions](#11-database--transactions)
-12. [Response Envelope](#12-response-envelope)
-13. [Helper Functions](#13-helper-functions)
-14. [Error Handling](#14-error-handling)
-15. [CORS & Sessions](#15-cors--sessions)
-16. [Rate Limiting](#16-rate-limiting)
-17. [AI Integration](#17-ai-integration)
-18. [Security](#18-security)
-19. [Deployment](#19-deployment)
-20. [API Reference](#20-api-reference)
-21. [Default Accounts](#21-default-accounts)
+> Full-stack car rental management platform with a dependency-free PHP API and vanilla JavaScript frontend.  
+> Pure PHP 8.1+ · No Framework Dependencies · MySQL · Docker Containerized
 
 ---
 
-## 1. Introduction
+## 📋 Table of Contents
 
-**Miniframe** is a handcrafted PHP micro-framework written from scratch without any external dependencies. It was built specifically for the **CRMS Car Rental Management System** as a school project requirement — proving that a clean, structured, production-quality API does not require Composer, Laravel, or any third-party package.
-
-### Philosophy
-
-- **One request, one path** — every HTTP request enters through `index.php` and follows a single predictable flow
-- **No magic** — every line of code is readable, traceable, and understandable
-- **Thin layers** — Router → Middleware → Controller → Model → QueryBuilder → PDO
-- **Convention over configuration** — follow the folder structure and things just work
-
-### What Miniframe provides
-
-| Feature | Implementation |
-|---|---|
-| URL Routing | `Router` — pattern matching with `:param` wildcards |
-| MVC Structure | Controllers, Models, Views (API — no views) |
-| Query Builder | Fluent SQL builder on top of PDO |
-| Validation | Rule-based `Validator` class |
-| Middleware | CORS, Auth, Rate Limiting |
-| Transactions | `DB::beginTransaction()`, `commit()`, `rollback()` |
-| Environment Config | `.env` file via `env()` helper |
-| Error Handling | Global exception handler — always returns JSON |
-| AI Integration | Gemini API via cURL — no SDK needed |
+1. [Overview](#overview)
+2. [Architecture](#architecture)
+3. [Project Structure](#project-structure)
+4. [Getting Started](#getting-started)
+5. [Core Features](#core-features)
+6. [API Documentation](#api-documentation)
+7. [Frontend](#frontend)
+8. [Development](#development)
 
 ---
 
-## 2. Project Structure
+## Overview
+
+**CRMS** is a comprehensive car rental management system designed for both customers and administrators. It features:
+
+- **Customer Portal**: Browse cars, make bookings, manage extensions, leave reviews, and report damages
+- **Admin Dashboard**: Manage fleet, bookings, customers, damage reports, and promotions
+- **AI Integration**: AI-powered car recommendations and customer support
+- **Real-time Availability**: Advanced availability checking with date-range filtering
+- **Payment Processing**: Promo codes and dynamic pricing
+- **Rate Limiting**: Per-IP request limits for API stability
+
+### Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Backend API | PHP 8.1+ (Miniframe custom framework) |
+| Frontend | Vanilla JavaScript (SPA) |
+| Database | MySQL 8.0 |
+| Containerization | Docker & Docker Compose |
+| AI | Google Gemini API |
+| HTTP Server | Nginx |
+
+---
+
+## Architecture
 
 ```
-crms-api/
+┌─────────────────────────────────────────────────────────────┐
+│                      User Browser                           │
+│                  (Vanilla JS Frontend)                      │
+└─────────────────┬───────────────────────────────────────────┘
+                  │ HTTPS / HTTP
+┌─────────────────▼───────────────────────────────────────────┐
+│                    Nginx Reverse Proxy                      │
+│              (Port 8080 - crms-frontend)                    │
+└─────────────────┬───────────────────────────────────────────┘
+                  │ Internal Docker Network
+┌─────────────────┴───────────────────────────────────────────┐
+│                      API Server (PHP)                       │
+│            (crms-api - Miniframe Framework)                 │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         Router → Middleware → Controller             │  │
+│  │              ↓                                        │  │
+│  │         Model → QueryBuilder → PDO ← MySQL          │  │
+│  └──────────────────────────────────────────────────────┘  │
+│           (Handles all business logic)                      │
+└─────────────────┬───────────────────────────────────────────┘
+                  │ TCP/IP (Port 3306)
+┌─────────────────▼───────────────────────────────────────────┐
+│                    MySQL Database                           │
+│  (Users, Cars, Bookings, Reviews, Damage Reports, etc.)    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Project Structure
+
+```
+crms/
+├── docker-compose.yml           ← Orchestrates all services
+├── README.md                    ← This file
+├── skills-lock.json             ← Agent skills configuration
 │
-├── index.php                    ← Single entry point for every request
-├── .htaccess                    ← Apache rewrite rules
-├── .env                         ← Environment config (never commit this)
-├── .env.example                 ← Safe template for teammates
-├── test.php                     ← Full test suite (35 tests)
+├── crms-api/                    ← Backend API (PHP)
+│   ├── index.php                ← Single entry point (router)
+│   ├── Dockerfile               ← PHP 8.1 Docker image
+│   ├── test.php                 ← Test suite
+│   ├── Readme.md                ← Detailed API documentation
+│   │
+│   ├── core/                    ← Miniframe Framework
+│   │   ├── Router.php           ← URL routing engine
+│   │   ├── Controller.php       ← Base controller class
+│   │   ├── Model.php            ← Base model class
+│   │   ├── Database.php         ← PDO singleton + transactions
+│   │   ├── QueryBuilder.php     ← Fluent SQL builder
+│   │   ├── Validator.php        ← Input validation rules
+│   │   └── helpers.php          ← Global utility functions
+│   │
+│   ├── middleware/              ← Request middleware
+│   │   ├── CorsMiddleware.php   ← CORS headers + preflight
+│   │   ├── AuthMiddleware.php   ← Session auth + role guards
+│   │   └── RateLimitMiddleware.php ← Per-IP rate limits
+│   │
+│   ├── controllers/             ← Request handlers
+│   │   ├── AuthController.php       ← Register, login, logout
+│   │   ├── CarController.php        ← Car CRUD + availability
+│   │   ├── BookingController.php    ← Bookings lifecycle
+│   │   ├── ReviewController.php     ← Car reviews
+│   │   ├── FavouriteController.php  ← Favourite cars
+│   │   ├── WaitlistController.php   ← Waitlist management
+│   │   ├── PromoController.php      ← Promo codes
+│   │   ├── DamageReportController.php ← Damage reports
+│   │   ├── AdminController.php      ← Admin dashboard data
+│   │   └── AiController.php         ← AI recommendations
+│   │
+│   ├── models/                  ← Data models
+│   │   ├── User.php
+│   │   ├── Car.php
+│   │   ├── Booking.php
+│   │   ├── Review.php
+│   │   ├── Favourite.php
+│   │   ├── Waitlist.php
+│   │   ├── Promo.php
+│   │   └── DamageReport.php
+│   │
+│   ├── config/
+│   │   └── routes.php           ← API route definitions
+│   │
+│   ├── database/
+│   │   ├── crms.sql             ← Database schema
+│   │   └── schema.php           ← Schema definitions
+│   │
+│   ├── public/
+│   │   └── uploads/
+│   │       └── cars/            ← Uploaded car images
+│   │
+│   └── config/
+│       └── .env.example         ← Environment template
 │
-├── core/                        ← Framework internals
-│   ├── helpers.php              ← Global functions: env(), dd(), generateRef()
-│   ├── Database.php             ← PDO singleton + transaction helpers
-│   ├── QueryBuilder.php         ← Fluent SQL builder
-│   ├── Model.php                ← Base model class
-│   ├── Controller.php           ← Base controller class
-│   ├── Validator.php            ← Input validation
-│   └── Router.php               ← URL routing engine
+├── crms-frontend/               ← Frontend (Vanilla JS)
+│   ├── index.html               ← Entry point (redirects to login)
+│   ├── Dockerfile               ← Nginx Docker image
+│   ├── nginx.conf               ← Nginx configuration
+│   │
+│   ├── pages/                   ← HTML pages
+│   │   ├── auth/                ← Login & register
+│   │   ├── customer/            ← Customer UI
+│   │   │   ├── vehicles.html    ← Car browsing
+│   │   │   ├── car-detail.html  ← Car details
+│   │   │   ├── bookings.html    ← Customer's bookings
+│   │   │   ├── booking-confirmed.html
+│   │   │   ├── extend-booking.html
+│   │   │   ├── favourites.html  ← Saved cars
+│   │   │   ├── profile.html     ← User profile
+│   │   │   ├── review.html      ← Review submission
+│   │   │   └── ...
+│   │   └── admin/               ← Admin dashboard
+│   │       ├── dashboard.html   ← Stats & overview
+│   │       ├── fleet.html       ← Car management
+│   │       ├── car-detail.html  ← Car edit
+│   │       ├── bookings.html    ← All bookings
+│   │       ├── customers.html   ← Customer list
+│   │       ├── customer-detail.html
+│   │       ├── damage-reports.html
+│   │       ├── promos.html      ← Promo management
+│   │       └── ...
+│   │
+│   ├── assets/                  ← Static resources
+│   │   ├── css/
+│   │   │   ├── variables.css    ← Design system (colors, spacing)
+│   │   │   ├── reset.css        ← Normalize styles
+│   │   │   ├── layout.css       ← Layout & grid
+│   │   │   ├── components.css   ← Component styles
+│   │   │   ├── animations.css   ← Transitions & animations
+│   │   │   └── components/      ← Component-specific styles
+│   │   └── js/                  ← Shared utilities
+│   │       ├── (empty - uses js/ folder below)
+│   │
+│   ├── js/                      ← Application logic
+│   │   ├── api.js               ← API client (fetch wrapper)
+│   │   ├── router.js            ← Frontend router (SPA navigation)
+│   │   ├── auth-guard.js        ← Auth middleware for routes
+│   │   ├── state.js             ← Global app state
+│   │   ├── utils.js             ← Helper functions
+│   │   ├── components/          ← Reusable UI components
+│   │   ├── pages/               ← Page-specific logic
+│   │   │   ├── auth.js          ← Login/register logic
+│   │   │   ├── vehicles.js      ← Car browsing
+│   │   │   ├── car-detail.js    ← Car detail page
+│   │   │   ├── bookings.js      ← Booking management
+│   │   │   ├── booking-confirmed.js
+│   │   │   ├── extend-booking.js
+│   │   │   ├── favourites.js
+│   │   │   ├── profile.js
+│   │   │   ├── review.js
+│   │   │   ├── admin-*.js       ← Admin pages
+│   │   │   └── ...
+│   │   ├── charts/              ← Chart components
+│   │   └── vendor/              ← Third-party libraries
+│   │
+│   └── assets/vendor/           ← CDN dependencies (Chart.js, etc.)
 │
-├── middleware/
-│   ├── CorsMiddleware.php       ← CORS headers + preflight handling
-│   ├── AuthMiddleware.php       ← Session-based auth + role guards
-│   └── RateLimitMiddleware.php  ← Per-IP request rate limiting
-│
-├── controllers/
-│   ├── AuthController.php       ← register, login, logout, me
-│   ├── CarController.php        ← CRUD + availability + reviews
-│   ├── BookingController.php    ← Full booking lifecycle
-│   ├── ReviewController.php     ← Submit reviews
-│   ├── FavouriteController.php  ← Save/remove favourite cars
-│   ├── WaitlistController.php   ← Join/leave waitlist
-│   ├── PromoController.php      ← Promo codes management
-│   ├── DamageReportController.php ← Damage logging + resolution
-│   ├── AdminController.php      ← Stats, customers, verification
-│   └── AiController.php         ← AI recommendations + chat
-│
-├── models/
-│   ├── User.php
+└── scripts/                     ← Utility scripts
+    ├── bulk_upload_images.sh    ← Car image bulk upload
+    └── upload_from_zip.sh       ← Image batch upload from ZIP
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Docker & Docker Compose
+- OR: PHP 8.1+, MySQL 8.0, Node.js (for development)
+
+### Quick Start with Docker
+
+```bash
+# Clone the repository
+git clone https://github.com/Ay981/crms
+cd crms
+
+# Copy environment template
+cp crms-api/.env.example crms-api/.env
+
+# Start all services
+docker-compose up -d
+
+# Services will be available at:
+# Frontend: http://localhost:8080
+# API: http://localhost:3000 (from frontend)
+# MySQL: localhost:3306 (internal network only)
+```
+
+### Development Setup (Without Docker)
+
+**Backend:**
+```bash
+cd crms-api
+
+# PHP with built-in server
+php -S localhost:3000
+
+# Or use Apache/Nginx with .htaccess
+```
+
+**Frontend:**
+```bash
+cd crms-frontend
+
+# Serve static files with any simple HTTP server
+python3 -m http.server 8080
+# Or use live-server, VS Code Live Server, etc.
+```
+
+**Database:**
+```bash
+# Create database and import schema
+mysql -u root -p
+CREATE DATABASE crms;
+USE crms;
+SOURCE database/crms.sql;
+```
+
+---
+
+## Core Features
+
+### Customer Features
+- ✅ **Browse Cars** - Filter by category, price, seats, transmission
+- ✅ **Advanced Availability** - Date-range availability checking with real-time lock
+- ✅ **Make Bookings** - Full booking flow with validation
+- ✅ **Extend Bookings** - Extend active rental periods
+- ✅ **Rate Cars** - Submit reviews with ratings
+- ✅ **Save Favorites** - Add cars to personal favorites list
+- ✅ **Damage Reporting** - Report car damages with photos
+- ✅ **Waitlist** - Join waitlist for unavailable cars
+- ✅ **User Profile** - Manage account and view booking history
+
+### Admin Features
+- ✅ **Fleet Management** - Add, edit, delete cars with availability control
+- ✅ **Booking Management** - View, approve, reject, extend bookings
+- ✅ **Customer Management** - View customer details and booking history
+- ✅ **Damage Reports** - Manage and resolve damage reports
+- ✅ **Promotions** - Create and manage promo codes
+- ✅ **Dashboard** - View revenue, bookings, customers stats
+- ✅ **Verification** - Approve user documents and data
+
+### Technical Features
+- ✅ **AI Recommendations** - Gemini API integration for car suggestions
+- ✅ **Rate Limiting** - 5 requests/minute per IP (configurable)
+- ✅ **Database Transactions** - ACID compliance for bookings
+- ✅ **CORS Support** - Secure cross-origin requests
+- ✅ **Session Auth** - Server-side session management with role-based access
+- ✅ **Validation** - Client & server-side input validation
+- ✅ **Error Handling** - Consistent JSON error responses
+
+---
+
+## API Documentation
+
+See [crms-api/Readme.md](crms-api/Readme.md) for complete API documentation including:
+
+- Detailed framework architecture
+- All endpoint specifications
+- Request/response examples
+- Authentication & authorization
+- Error handling
+- Database schema
+- Helper functions
+- Configuration reference
+
+### API Structure
+
+**Base URL:** `http://localhost:3000` (development) or `http://api.crms.local` (production)
+
+**Authentication:** Session-based (login required for most endpoints)
+
+**Response Format:**
+```json
+{
+  "status": "success|error",
+  "message": "Human-readable message",
+  "data": {} or [],
+  "error": null or "error string"
+}
+```
+
+**Key Endpoints:**
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `GET /cars` - List cars (filterable)
+- `POST /bookings` - Create booking
+- `GET /bookings` - User's bookings
+- `POST /reviews` - Submit review
+- `GET /admin/stats` - Dashboard stats (admin only)
+
+---
+
+## Frontend
+
+### Architecture
+
+**Vanilla JavaScript SPA** with:
+- **Router** (`router.js`) - Client-side routing without framework overhead
+- **API Client** (`api.js`) - Centralized REST API communication
+- **State Management** (`state.js`) - Global app state (user, UI state)
+- **Auth Guard** (`auth-guard.js`) - Middleware for protected routes
+
+### Page Organization
+
+```javascript
+// Each page has:
+// 1. HTML page (pages/category/page.html)
+// 2. JS logic file (js/pages/page.js)
+// 3. CSS styles (assets/css/components/page.css)
+
+// Navigation example
+router.navigate('/cars');  // Goes to pages/customer/vehicles.html
+```
+
+### Component System
+
+Reusable UI components in `js/components/`:
+- Navigation header
+- Booking form
+- Review card
+- Damage report modal
+- Promo code input
+- etc.
+
+### Styling
+
+- **Design System** (`assets/css/variables.css`) - Colors, spacing, typography
+- **Component Styles** (`assets/css/components.css`) - Reusable component styles
+- **Layouts** (`assets/css/layout.css`) - Page layouts and grid
+- **Animations** (`assets/css/animations.css`) - Smooth transitions
+
+---
+
+## Development
+
+### Database Schema
+
+Tables:
+- `users` - User accounts (customers & admins)
+- `cars` - Vehicle inventory
+- `bookings` - Car rental bookings
+- `reviews` - Car reviews & ratings
+- `favourites` - Saved cars per user
+- `damage_reports` - Damage reports
+- `waitlist` - Waitlist entries
+- `promos` - Promotion codes
+- Access [crms-api/database/crms.sql](crms-api/database/crms.sql) for full schema
+
+### Environment Variables
+
+**Required (.env):**
+```
+APP_ENV=production|development
+DB_HOST=localhost
+DB_NAME=crms
+DB_USER=root
+DB_PASS=password
+ALLOWED_ORIGIN=http://localhost:8080
+GEMINI_API_KEY=your-api-key
+RATE_LIMIT=5
+```
+
+### Testing
+
+```bash
+cd crms-api
+php test.php
+```
+
+Run full integration test suite (35 tests)
+
+---
+
+## Deployment
+
+### Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+Services:
+- **db** - MySQL 8.0
+- **api** - PHP 8.1 (crms-api)
+- **frontend** - Nginx (crms-frontend)
+
+### Environment Setup for Production
+
+1. Generate strong DB password
+2. Set `APP_ENV=production`
+3. Configure `ALLOWED_ORIGIN` for your domain
+4. Add `GEMINI_API_KEY` for AI features
+5. Use HTTPS with valid certificates
+6. Configure Nginx SSL in `crms-frontend/nginx.conf`
+
+---
+
+## Key Implementation Details
+
+### Miniframe Framework
+
+**Why custom framework?** School project requirement - proves understanding of routing, MVC, and database abstraction without relying on Laravel/Symfony.
+
+**Features:**
+- Router with `:param` pattern matching
+- PDO-based QueryBuilder with fluent API
+- Model base class with relationships
+- Validator with 20+ rule types
+- Transaction support for data integrity
+- Global helpers for common tasks
+
+### Session-Based Authentication
+
+Routes protected with `AuthMiddleware`:
+```php
+// Admin-only route
+Router::post('/admin/promo', [AdminController::class, 'createPromo'], 'role:admin');
+
+// Authenticated route
+Router::post('/bookings', [BookingController::class, 'store'], 'auth');
+```
+
+### Database Locking
+
+Prevents race conditions on simultaneous bookings:
 │   ├── Car.php
 │   ├── Booking.php
 │   ├── Review.php
