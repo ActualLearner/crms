@@ -42,7 +42,8 @@
 
 .admin-brand-mark svg,
 .admin-nav svg,
-.admin-btn svg {
+.admin-btn svg,
+.admin-icon-btn svg {
 	width: 16px;
 	height: 16px;
 	stroke: currentColor;
@@ -124,7 +125,6 @@
 }
 
 .admin-icon-btn {
-	display: none;
 	width: 40px;
 	height: 40px;
 	border: 1px solid var(--border-subtle);
@@ -133,6 +133,7 @@
 	color: var(--text-primary);
 	cursor: pointer;
 	transition: background-color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+	display: none;
 }
 
 .admin-page {
@@ -992,6 +993,54 @@
 	backdrop-filter: blur(3px);
 }
 
+.admin-modal-body input,
+.admin-modal-body select,
+.admin-modal-body textarea {
+	border: 1px solid var(--border-subtle) !important;
+	border-radius: var(--radius-sm);
+	padding: var(--space-3) var(--space-4);
+	font: inherit;
+	font-size: 15px;
+	background: hsl(0 0% 98%);
+	color: var(--text-primary);
+}
+
+.admin-modal-body input:focus,
+.admin-modal-body select:focus,
+.admin-modal-body textarea:focus {
+	outline: none;
+	border-color: hsl(220 8% 48%);
+	box-shadow: 0 0 0 3px hsl(220 8% 78% / 0.45);
+	background: var(--surface-elevated);
+}
+
+#car-edit-modal input,
+#car-edit-modal select,
+#car-edit-modal textarea {
+	border: 1px solid var(--border-subtle) !important;
+	border-radius: var(--radius-sm);
+	padding: var(--space-4) var(--space-4);
+	font: inherit;
+	font-size: 15px;
+	background: hsl(0 0% 98%);
+	color: var(--text-primary);
+	min-height: 48px;
+}
+
+#car-edit-modal select {
+	min-height: 56px;
+	padding: var(--space-3) var(--space-4);
+}
+
+#car-edit-modal input:focus,
+#car-edit-modal select:focus,
+#car-edit-modal textarea:focus {
+	outline: none;
+	border-color: hsl(220 8% 48%);
+	box-shadow: 0 0 0 3px hsl(220 8% 78% / 0.45);
+	background: var(--surface-elevated);
+}
+
 .admin-modal-header,
 .admin-modal-body,
 .admin-modal-actions {
@@ -1277,6 +1326,12 @@
 	text-align: center;
 }
 
+@media (max-width: 1024px) {
+	.admin-icon-btn {
+		display: none !important;
+	}
+}
+
 @media (max-width: 920px) {
 	.admin-topbar {
 		height: auto;
@@ -1287,8 +1342,7 @@
 	}
 
 	.admin-icon-btn {
-		display: grid;
-		place-items: center;
+		display: none !important;
 	}
 
 	.admin-section-label {
@@ -1299,7 +1353,7 @@
 	.admin-nav {
 		order: 3;
 		flex-basis: 100%;
-		display: none;
+		display: flex !important;
 		justify-content: flex-start;
 		overflow-x: auto;
 		padding-top: var(--space-2);
@@ -1311,6 +1365,14 @@
 
 	.admin-nav a {
 		white-space: nowrap;
+		flex: 1;
+		min-height: 48px;
+		padding: var(--space-4);
+		justify-content: center;
+	}
+
+	.admin-nav a span {
+		display: none;
 	}
 
 	.admin-page {
