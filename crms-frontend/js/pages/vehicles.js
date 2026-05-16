@@ -265,7 +265,7 @@
 			}
 			renderCars();
 		} catch (error) {
-			window.alert(error.message || 'Could not update favourites.');
+			window.UIUtils?.toast(error.message || 'Could not update favourites.', 'error');
 		} finally {
 			button.disabled = false;
 		}

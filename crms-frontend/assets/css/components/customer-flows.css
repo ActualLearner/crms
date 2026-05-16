@@ -331,6 +331,122 @@
 	color: var(--brand-light);
 }
 
+.notification-page {
+	width: min(100%, 1120px);
+}
+
+.notification-shell {
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-lg);
+	background: var(--surface-elevated);
+	overflow: hidden;
+}
+
+.notification-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-4);
+	padding: var(--space-8);
+	border-bottom: 1px solid var(--border-subtle);
+}
+
+.notification-head h1 {
+	font-size: clamp(30px, 4vw, 42px);
+	line-height: 1.08;
+	letter-spacing: 0;
+}
+
+.notification-head p {
+	margin-top: var(--space-2);
+	color: var(--text-muted);
+}
+
+.notification-list.modern {
+	gap: 0;
+}
+
+.notification-row {
+	position: relative;
+	display: grid;
+	grid-template-columns: 56px minmax(0, 1fr) minmax(120px, auto);
+	gap: var(--space-5);
+	align-items: center;
+	padding: var(--space-6) var(--space-8);
+	border-bottom: 1px solid hsl(0 0% 91%);
+	background: var(--surface-elevated);
+}
+
+.notification-row:last-child {
+	border-bottom: 0;
+}
+
+.notification-row.unread {
+	background: hsl(0 0% 99%);
+}
+
+.notification-row .notification-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: var(--radius-sm);
+	background: hsl(0 0% 94%);
+	color: var(--text-muted);
+}
+
+.notification-row .notification-icon svg {
+	width: 22px;
+	height: 22px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.notification-copy {
+	min-width: 0;
+	display: grid;
+	gap: var(--space-2);
+}
+
+.notification-copy strong {
+	font-size: 18px;
+	line-height: 1.25;
+}
+
+.notification-copy p {
+	color: var(--text-secondary);
+	line-height: 1.45;
+}
+
+.notification-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-top: var(--space-2);
+}
+
+.notification-actions .flow-button {
+	min-height: 40px;
+	padding: 0 var(--space-4);
+}
+
+.notification-meta {
+	display: grid;
+	justify-items: end;
+	gap: var(--space-3);
+	color: var(--text-muted);
+	font-size: 14px;
+	white-space: nowrap;
+}
+
+.notification-meta i {
+	width: 12px;
+	height: 12px;
+	border-radius: 999px;
+	background: var(--brand-dark);
+}
+
 .extension-summary {
 	display: grid;
 	gap: var(--space-3);
@@ -379,6 +495,23 @@
 	.flow-grid {
 		grid-template-columns: 1fr;
 	}
+
+	.notification-head {
+		padding: var(--space-6);
+	}
+
+	.notification-row {
+		grid-template-columns: 48px minmax(0, 1fr);
+		padding: var(--space-5);
+		gap: var(--space-4);
+	}
+
+	.notification-meta {
+		grid-column: 2;
+		justify-items: start;
+		display: flex;
+		align-items: center;
+	}
 }
 
 @media (max-width: 640px) {
@@ -391,6 +524,19 @@
 
 	.flow-button {
 		width: 100%;
+	}
+
+	.notification-head {
+		display: grid;
+	}
+
+	.notification-row {
+		grid-template-columns: 1fr;
+	}
+
+	.notification-row .notification-icon,
+	.notification-meta {
+		grid-column: auto;
 	}
 
 	.flow-car-strip,

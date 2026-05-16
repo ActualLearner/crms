@@ -3,7 +3,7 @@
 	background: hsl(0 0% 94%);
 	border: 0;
 	display: grid;
-	grid-template-columns: 288px minmax(0, 1fr);
+	grid-template-columns: 304px minmax(0, 1fr);
 	min-height: 0;
 }
 
@@ -14,7 +14,7 @@
 	display: grid;
 	grid-template-columns: 320px minmax(0, 1fr);
 	gap: var(--space-6);
-	padding: var(--space-6) var(--space-8) var(--space-8);
+	padding: var(--space-6) clamp(var(--space-4), 3vw, var(--space-10)) var(--space-8);
 	min-height: 0;
 	overflow: auto;
 }
@@ -244,4 +244,3 @@
 .muted {
 	color: var(--text-muted);
 }
-

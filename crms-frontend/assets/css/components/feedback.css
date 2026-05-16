@@ -1,0 +1,118 @@
+.toast-stack {
+	position: fixed;
+	right: var(--space-5);
+	bottom: var(--space-5);
+	z-index: 1000;
+	display: grid;
+	gap: var(--space-3);
+	width: min(360px, calc(100vw - 32px));
+}
+
+.toast-message {
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-sm);
+	background: hsl(220 10% 8%);
+	color: var(--brand-light);
+	padding: var(--space-4);
+	box-shadow: 0 16px 40px hsl(220 10% 8% / 0.2);
+	font-size: 15px;
+	line-height: 1.45;
+	transform: translateY(10px);
+	opacity: 0;
+	transition: opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+}
+
+.toast-message.is-visible {
+	transform: translateY(0);
+	opacity: 1;
+}
+
+.toast-message.error {
+	background: hsl(0 46% 18%);
+}
+
+.toast-message.success {
+	background: hsl(145 42% 18%);
+}
+
+.confirm-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 999;
+	display: grid;
+	place-items: center;
+	padding: var(--space-4);
+	background: hsl(220 10% 8% / 0.42);
+	backdrop-filter: blur(3px);
+}
+
+.confirm-modal {
+	width: min(420px, 100%);
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-md);
+	background: var(--surface-elevated);
+	color: var(--text-primary);
+	box-shadow: 0 24px 80px hsl(220 10% 8% / 0.22);
+	overflow: hidden;
+}
+
+.confirm-modal header,
+.confirm-modal footer {
+	padding: var(--space-5);
+}
+
+.confirm-modal header {
+	border-bottom: 1px solid var(--border-subtle);
+}
+
+.confirm-modal h2 {
+	font-size: 20px;
+	line-height: 1.2;
+	letter-spacing: 0;
+}
+
+.confirm-modal p {
+	margin-top: var(--space-2);
+	color: var(--text-secondary);
+}
+
+.confirm-modal footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--space-3);
+	background: hsl(0 0% 96%);
+}
+
+.confirm-modal button {
+	min-height: 44px;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-5);
+	font: inherit;
+	font-weight: 650;
+	cursor: pointer;
+}
+
+.confirm-cancel {
+	border: 1px solid var(--border-subtle);
+	background: var(--surface-elevated);
+	color: var(--text-primary);
+}
+
+.confirm-action {
+	border: 1px solid var(--brand-dark);
+	background: var(--brand-dark);
+	color: var(--brand-light);
+}
+
+@media (max-width: 640px) {
+	.toast-stack {
+		left: var(--space-4);
+		right: var(--space-4);
+		bottom: var(--space-4);
+		width: auto;
+	}
+
+	.confirm-modal footer {
+		flex-direction: column-reverse;
+	}
+}

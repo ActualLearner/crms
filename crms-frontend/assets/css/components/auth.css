@@ -1,13 +1,14 @@
 .card {
-	width: min(100%, 460px);
+	width: min(100%, 480px);
 	background: var(--surface);
 	border: 1px solid var(--border-subtle);
 	border-radius: var(--radius-xl);
 	overflow: hidden;
+	box-shadow: 0 20px 70px hsl(220 10% 8% / 0.08);
 }
 
 .card.auth-card-wide {
-	width: min(100%, 640px);
+	width: min(100%, 760px);
 }
 
 .card-header {
@@ -249,3 +250,20 @@
 	}
 }
 
+@media (max-width: 520px) {
+	.card-header,
+	.card-body {
+		padding: var(--space-5);
+	}
+
+	.headline {
+		font-size: 30px;
+	}
+
+	.subhead,
+	.field-label,
+	.remember,
+	.auth-footnote {
+		font-size: 15px;
+	}
+}

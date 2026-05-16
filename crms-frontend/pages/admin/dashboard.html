@@ -24,8 +24,8 @@
       </div>
     </header>
 
-    <main class="admin-page">
-      <div class="admin-page-header">
+    <main class="admin-page admin-dashboard-page">
+      <div class="admin-page-header dashboard-hero">
         <div>
           <h1>Good morning, Admin</h1>
           <p id="dashboard-date">Fleet, booking, and revenue overview</p>
@@ -39,59 +39,82 @@
         </div>
       </div>
 
-      <section class="admin-stats-grid" aria-label="Dashboard stats">
-        <article class="admin-stat-card"><span>Total revenue</span><strong id="stat-revenue">$0</strong><small class="tone-success">↗ live total</small></article>
-        <article class="admin-stat-card"><span>Active bookings</span><strong id="stat-active">0</strong><small class="tone-success">currently moving</small></article>
-        <article class="admin-stat-card"><span>Fleet utilization</span><strong id="stat-utilization">0%</strong><small><span id="stat-util-detail">0/0 cars</span></small></article>
-        <article class="admin-stat-card"><span>Pending confirmation</span><strong id="stat-pending">0</strong><small class="tone-warning">needs review</small></article>
+      <section class="dashboard-stat-grid" aria-label="Dashboard stats">
+        <article class="dashboard-stat-card">
+          <span>Vehicles</span>
+          <strong id="stat-vehicles">0</strong>
+          <small>Total fleet</small>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14l-1.3-5.2A3 3 0 0 0 14.8 9H9.2a3 3 0 0 0-2.9 2.8L5 17Z"></path><path d="M7 17v2"></path><path d="M17 17v2"></path><path d="M8 13h8"></path></svg>
+        </article>
+        <article class="dashboard-stat-card">
+          <span>Bookings</span>
+          <strong id="stat-active">0</strong>
+          <small>Active now</small>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
+        </article>
+        <article class="dashboard-stat-card">
+          <span>Revenue</span>
+          <strong id="stat-revenue">$0</strong>
+          <small>All time</small>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </article>
+        <article class="dashboard-stat-card">
+          <span>Pending</span>
+          <strong id="stat-pending">0</strong>
+          <small>Needs review</small>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        </article>
       </section>
 
-      <section class="dashboard-grid">
-        <article class="admin-panel chart-panel">
-          <h2>Revenue over time</h2>
-          <svg class="line-chart" viewBox="0 0 520 220" preserveAspectRatio="none" aria-label="Revenue trend">
-            <g stroke="hsl(0 0% 90%)" stroke-width="1">
-              <path d="M0 40H520M0 85H520M0 130H520M0 175H520"/>
-            </g>
-            <path id="revenue-line" d="M0 180 C35 120 58 156 90 100 S145 80 170 112 235 52 268 72 325 38 360 58 430 32 520 36" fill="none" stroke="hsl(220 8% 30%)" stroke-width="4" stroke-linecap="round"/>
-          </svg>
-        </article>
-
-        <article class="admin-panel chart-panel">
-          <h2>Fleet status</h2>
-          <p><span id="fleet-total-copy">0</span> vehicles total</p>
-          <div class="donut-wrap">
-            <div class="donut" id="fleet-donut" style="--rented: 0%; --available: 0%"></div>
-            <div class="legend">
-              <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="--swatch: var(--brand-dark)"></span>Rented</span><strong id="legend-rented">0</strong></div>
-              <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="--swatch: hsl(145 56% 48%)"></span>Available</span><strong id="legend-available">0</strong></div>
-              <div class="legend-row"><span class="legend-key"><span class="legend-swatch" style="--swatch: hsl(38 84% 52%)"></span>Maintenance</span><strong id="legend-maintenance">0</strong></div>
-            </div>
+      <section class="dashboard-showcase">
+        <article class="dashboard-panel dashboard-list-panel">
+          <div class="dashboard-panel-head">
+            <h2>Recent vehicles</h2>
+            <a href="./fleet.html">View all</a>
           </div>
+          <div class="dashboard-vehicle-list" id="dashboard-vehicles"></div>
         </article>
 
-        <article class="admin-panel chart-panel">
-          <h2>Most rented cars</h2>
-          <div class="bar-list" id="top-cars"></div>
+        <article class="dashboard-panel dashboard-list-panel">
+          <div class="dashboard-panel-head">
+            <h2>Recent bookings</h2>
+            <a href="./bookings.html">View all</a>
+          </div>
+          <div class="dashboard-booking-list" id="recent-bookings"></div>
         </article>
 
-        <article class="admin-panel chart-panel">
-          <h2>Busiest booking hours</h2>
-          <div class="bar-list" id="booking-hours"></div>
+        <article class="dashboard-panel dashboard-activity-panel">
+          <div class="dashboard-panel-head">
+            <div>
+              <h2>Activity overview</h2>
+              <p>Your recent booking rhythm</p>
+            </div>
+            <select class="admin-select compact" aria-label="Activity range">
+              <option>This week</option>
+              <option>This month</option>
+            </select>
+          </div>
+          <svg class="dashboard-line" viewBox="0 0 520 220" preserveAspectRatio="none" aria-label="Activity trend">
+            <path d="M32 150 C86 106 126 90 164 140 S238 176 280 86 360 120 400 142 462 118 496 78" fill="none" stroke="hsl(220 8% 10%)" stroke-width="5" stroke-linecap="round"/>
+            <g fill="var(--surface-elevated)" stroke="hsl(220 8% 10%)" stroke-width="4">
+              <circle cx="32" cy="150" r="6"/><circle cx="164" cy="140" r="6"/><circle cx="280" cy="86" r="6"/><circle cx="400" cy="142" r="6"/><circle cx="496" cy="78" r="6"/>
+            </g>
+          </svg>
+          <div class="dashboard-week-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
         </article>
-      </section>
 
-      <section class="admin-panel">
-        <div class="admin-panel-header">
-          <h2 class="admin-panel-title">Recent bookings</h2>
-          <a class="admin-btn" href="./bookings.html">View all</a>
-        </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Customer</th><th>Vehicle</th><th>Created</th><th>Total</th><th>Status</th></tr></thead>
-            <tbody id="recent-bookings"></tbody>
-          </table>
-        </div>
+        <article class="dashboard-panel dashboard-actions-panel">
+          <div class="dashboard-panel-head"><h2>Quick actions</h2></div>
+          <a class="dashboard-action-row" href="./fleet.html">
+            <span>+</span><strong>Add vehicle</strong><small>Register a new vehicle</small>
+          </a>
+          <a class="dashboard-action-row" href="./bookings.html">
+            <span>✓</span><strong>Review bookings</strong><small>Confirm pending requests</small>
+          </a>
+          <a class="dashboard-action-row" href="./damage-reports.html">
+            <span>!</span><strong>Damage reports</strong><small>Resolve fleet issues</small>
+          </a>
+        </article>
       </section>
     </main>
   </div>

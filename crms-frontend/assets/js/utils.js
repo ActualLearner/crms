@@ -69,17 +69,90 @@
 			.join('');
 	}
 
+	function escapeForHtml(value = '') {
+		return String(value).replace(/[&<>"']/g, (char) => ({
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			"'": '&#039;',
+		})[char]);
+	}
+
+	function toast(message, type = 'info') {
+		if (!message) {
+			return;
+		}
+
+		let stack = document.querySelector('[data-toast-stack]');
+		if (!stack) {
+			stack = document.createElement('div');
+			stack.className = 'toast-stack';
+			stack.dataset.toastStack = '';
+			document.body.appendChild(stack);
+		}
+
+		const item = document.createElement('div');
+		item.className = `toast-message ${type}`;
+		item.setAttribute('role', type === 'error' ? 'alert' : 'status');
+		item.textContent = message;
+		stack.appendChild(item);
+
+		requestAnimationFrame(() => item.classList.add('is-visible'));
+		setTimeout(() => {
+			item.classList.remove('is-visible');
+			item.addEventListener('transitionend', () => item.remove(), { once: true });
+		}, 3600);
+	}
+
+	function ask(message, options = {}) {
+		return new Promise((resolve) => {
+			const backdrop = document.createElement('div');
+			backdrop.className = 'confirm-backdrop';
+			backdrop.innerHTML = `
+				<section class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+					<header>
+						<h2 id="confirm-title">${escapeForHtml(options.title || 'Confirm action')}</h2>
+						<p>${escapeForHtml(message)}</p>
+					</header>
+					<footer>
+						<button class="confirm-cancel" type="button">${escapeForHtml(options.cancelText || 'Cancel')}</button>
+						<button class="confirm-action" type="button">${escapeForHtml(options.confirmText || 'Continue')}</button>
+					</footer>
+				</section>
+			`;
+
+			const cleanup = (value) => {
+				document.removeEventListener('keydown', onKeydown);
+				backdrop.remove();
+				resolve(value);
+			};
+			const onKeydown = (event) => {
+				if (event.key === 'Escape') {
+					cleanup(false);
+				}
+			};
+
+			backdrop.querySelector('.confirm-cancel').addEventListener('click', () => cleanup(false));
+			backdrop.querySelector('.confirm-action').addEventListener('click', () => cleanup(true));
+			backdrop.addEventListener('click', (event) => {
+				if (event.target === backdrop) {
+					cleanup(false);
+				}
+			});
+			document.addEventListener('keydown', onKeydown);
+			document.body.appendChild(backdrop);
+			backdrop.querySelector('.confirm-action').focus();
+		});
+	}
+
 	window.UIUtils = {
                 showNotificationBanner(message) {
-                        if (document.getElementById('crms-notification-banner')) return;
-                        const banner = document.createElement('div');
-                        banner.id = 'crms-notification-banner';
-                        banner.style.cssText = 'background-color: var(--primary, #0056b3); color: white; padding: 12px 20px; text-align: center; position: sticky; top: 0; z-index: 9999; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 10px;';
-                        banner.innerHTML = `<span>🔔 ${message}</span> <button aria-label="Dismiss" style="background:none;border:none;color:white;cursor:pointer;font-size:1.2rem;line-height:1;">&times;</button>`;
-                        banner.querySelector('button').addEventListener('click', () => banner.remove());
-                        document.body.prepend(banner);
+                        toast(message, 'success');
                 },
 		showMessage,
+		toast,
+		ask,
 		formatDate,
 		formatMoney,
 		initials,

@@ -61,8 +61,42 @@ window.AdminUI = (() => {
 	}
 
 	function toast(message) {
-		if (window.Toast?.show) window.Toast.show(message);
-		else alert(message);
+		if (window.UIUtils?.toast) {
+			window.UIUtils.toast(message);
+			return;
+		}
+		let stack = document.querySelector('[data-toast-stack]');
+		if (!stack) {
+			stack = document.createElement('div');
+			stack.className = 'toast-stack';
+			stack.dataset.toastStack = '';
+			document.body.appendChild(stack);
+		}
+		const item = document.createElement('div');
+		item.className = 'toast-message is-visible';
+		item.setAttribute('role', 'status');
+		item.textContent = message;
+		stack.appendChild(item);
+		setTimeout(() => item.remove(), 3600);
+	}
+
+	function ask(message, options = {}) {
+		if (window.UIUtils?.ask) return window.UIUtils.ask(message, options);
+		return new Promise((resolve) => {
+			const backdrop = document.createElement('div');
+			backdrop.className = 'confirm-backdrop';
+			backdrop.innerHTML = `
+				<section class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+					<header><h2 id="confirm-title">${escape(options.title || 'Confirm action')}</h2><p>${escape(message)}</p></header>
+					<footer><button class="confirm-cancel" type="button">${escape(options.cancelText || 'Cancel')}</button><button class="confirm-action" type="button">${escape(options.confirmText || 'Continue')}</button></footer>
+				</section>
+			`;
+			const cleanup = value => { backdrop.remove(); resolve(value); };
+			backdrop.querySelector('.confirm-cancel').addEventListener('click', () => cleanup(false));
+			backdrop.querySelector('.confirm-action').addEventListener('click', () => cleanup(true));
+			document.body.appendChild(backdrop);
+			backdrop.querySelector('.confirm-action').focus();
+		});
 	}
 
 	function setText(id, value) {
@@ -74,5 +108,5 @@ window.AdminUI = (() => {
 		return `<div class="empty-state">${label}</div>`;
 	}
 
-	return { init, unwrap, money, date, initials, status, escape, toast, setText, empty };
+	return { init, unwrap, money, date, initials, status, escape, toast, ask, setText, empty };
 })();

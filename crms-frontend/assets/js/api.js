@@ -1,10 +1,29 @@
 (() => {
-	const configuredBaseUrl =
-		window.CRMS_API_BASE_URL ||
-		localStorage.getItem('CRMS_API_BASE_URL') ||
-		((window.location.protocol === 'http:' || window.location.protocol === 'https:')
-			? `${window.location.origin}/api`
-			: 'http://127.0.0.1:8082');
+	function resolveBaseUrl() {
+		const explicitBaseUrl =
+			window.CRMS_API_BASE_URL ||
+			localStorage.getItem('CRMS_API_BASE_URL');
+
+		if (explicitBaseUrl) {
+			return explicitBaseUrl;
+		}
+
+		const { protocol, hostname, port, origin } = window.location;
+		const isLocalDevHost = hostname === 'localhost' || hostname === '127.0.0.1';
+		const isStaticDevServer = isLocalDevHost && ['5500', '5173', '3000'].includes(port);
+
+		if (isStaticDevServer || protocol === 'file:') {
+			return 'http://127.0.0.1:8082';
+		}
+
+		if (protocol === 'http:' || protocol === 'https:') {
+			return `${origin}/api`;
+		}
+
+		return 'http://127.0.0.1:8082';
+	}
+
+	const configuredBaseUrl = resolveBaseUrl();
 
 	async function request(path, options = {}) {
 		const isFormData = options.body instanceof FormData;

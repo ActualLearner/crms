@@ -17,6 +17,25 @@
         return fleet.find(car => String(car.id) === String(id));
     }
 
+    function escapeHtml(value = '') {
+        return String(value).replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;',
+        })[char]);
+    }
+
+    function money(value) {
+        const amount = Number(value || 0);
+        return `$${amount.toFixed(2)}`;
+    }
+
+    function detailValue(value, fallback = 'Not set') {
+        return escapeHtml(value || fallback);
+    }
+
     // ── Data loading ────────────────────────────────────────────
     async function loadFleet() {
         try {
@@ -128,6 +147,49 @@
         document.getElementById('add-vehicle-modal')?.showModal();
     }
 
+    function openDetailModal(car) {
+        const detailModal = document.getElementById('vehicle-detail-modal');
+        const detailBody = document.querySelector('[data-detail-body]');
+        if (!detailModal || !detailBody || !car) return;
+
+        const name = `${escapeHtml(car.brand || '')} ${escapeHtml(car.model || '')}`.trim() || 'Vehicle';
+        const status = escapeHtml(car.status || 'available');
+        const subtitle = `${escapeHtml(car.year || '—')} · ${escapeHtml(car.category || 'Vehicle')}`;
+        const transmission = String(car.transmission || '').toLowerCase() === 'manual' ? 'Manual' : 'Automatic';
+
+        detailBody.innerHTML = `
+            <div class="vehicle-detail-header">
+                <div class="vehicle-detail-media">
+                    <img src="${escapeHtml(imageSrc(car.image_url))}" alt="${name}" loading="lazy">
+                </div>
+                <div class="vehicle-detail-title">
+                    <h2>${name}</h2>
+                    <p>${subtitle}</p>
+                    <span class="vehicle-detail-status ${status}">${status}</span>
+                </div>
+                <div class="vehicle-detail-actions">
+                    <button class="btn-card-outline" type="button" data-detail-edit="${car.id}">Edit</button>
+                    <button class="modal-close-btn" type="button" data-detail-close aria-label="Close vehicle details">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="vehicle-detail-grid" aria-label="Vehicle details">
+                <div><span>Vehicle ID</span><strong>${detailValue(car.id)}</strong></div>
+                <div><span>License Plate</span><strong>${detailValue(car.license_plate || car.plate_number || 'Unassigned')}</strong></div>
+                <div><span>Daily Rate</span><strong>${money(car.daily_rate)} / day</strong></div>
+                <div><span>Seats</span><strong>${detailValue(car.seats)}</strong></div>
+                <div><span>Transmission</span><strong>${transmission}</strong></div>
+                <div><span>Drive Type</span><strong>${detailValue(car.drive_type || 'AWD')}</strong></div>
+                <div><span>Penalty Rate</span><strong>${money(car.penalty_rate)} / day</strong></div>
+                <div><span>Next Service</span><strong>${detailValue(car.next_service || car.updated_at || 'Schedule review')}</strong></div>
+            </div>
+            ${car.description ? `<p class="vehicle-detail-description">${escapeHtml(car.description)}</p>` : ''}
+        `;
+
+        detailModal.showModal();
+    }
+
     // ── Rendering ───────────────────────────────────────────────
     function renderGrid(cars) {
         const grid = document.getElementById('fleet-grid');
@@ -137,8 +199,8 @@
             grid.innerHTML = '<div class="empty-state"><p>No vehicles found.</p></div>';
             return;
         }
-
-        grid.innerHTML = cars.map(car => {
+    
+    grid.innerHTML = cars.map(car => {
             const statusCls = car.status === 'available'
                 ? 'available'
                 : car.status === 'maintenance'
@@ -151,37 +213,38 @@
             const seats = car.seats || '—';
             const rating = (Math.random() * 1 + 4).toFixed(1);
             const reviewCount = Math.floor(Math.random() * 500);
+            const name = `${escapeHtml(car.brand || '')} ${escapeHtml(car.model || '')}`.trim();
 
             return `
 <div class="vehicle-card">
   <div class="vehicle-media">
-    <img src="${imageSrc(car.image_url)}" alt="${car.brand} ${car.model}" loading="lazy">
-    <span class="card-badge ${statusCls}">${car.status}</span>
-    <span class="card-seats">${seats} seats</span>
+    <img src="${escapeHtml(imageSrc(car.image_url))}" alt="${name}" loading="lazy">
+    <span class="card-badge ${statusCls}">${escapeHtml(car.status || 'available')}</span>
+    <span class="card-seats">${escapeHtml(seats)} seats</span>
   </div>
 
   <div class="vehicle-body">
-    <h2 class="vehicle-name">${car.brand} ${car.model}</h2>
+    <h2 class="vehicle-name">${name}</h2>
 
     <div class="vehicle-meta">
-      ${year ? `<span>${year}</span><span class="dot"></span>` : ''}
-      <span>${category}</span>
+      ${year ? `<span>${escapeHtml(year)}</span><span class="dot"></span>` : ''}
+      <span>${escapeHtml(category || 'Vehicle')}</span>
       <span class="dot"></span>
       <span>${transmission}</span>
       <span class="dot"></span>
-      <span>${car.status}</span>
+      <span>${escapeHtml(car.status || 'available')}</span>
     </div>
 
     <div class="vehicle-rating">
       ★ ${rating} <span style="font-weight:400;color:var(--text-muted);">(${reviewCount})</span>
     </div>
 
-    <div class="vehicle-footer">
-      <div class="vehicle-price">$${parseFloat(car.daily_rate).toFixed(2)}<span>/ day</span></div>
-      <div class="card-actions">
-        <button class="btn-card-outline" data-edit-id="${car.id}">Edit</button>
-      </div>
-    </div>
+        <div class="vehicle-footer">
+            <div class="vehicle-price">${money(car.daily_rate)}<span>/ day</span></div>
+            <div class="card-actions">
+                <button class="btn-card-primary" type="button" data-view-id="${car.id}">View details</button>
+            </div>
+        </div>
   </div>
 </div>`;
         }).join('');
@@ -313,12 +376,35 @@
             });
         }
 
-        // Edit actions on cards
-        document.getElementById('fleet-grid')?.addEventListener('click', (e) => {
-            const editBtn = e.target.closest('[data-edit-id]');
-            if (!editBtn) return;
-            const car = getCarById(editBtn.dataset.editId);
+        document.getElementById('vehicle-detail-modal')?.addEventListener('click', (e) => {
+            if (e.target.closest('[data-detail-close]')) {
+                document.getElementById('vehicle-detail-modal')?.close();
+                return;
+            }
+
+            const editButton = e.target.closest('[data-detail-edit]');
+            if (!editButton) return;
+            const car = getCarById(editButton.dataset.detailEdit);
+            document.getElementById('vehicle-detail-modal')?.close();
             if (car) openVehicleModal('edit', car);
+        });
+
+        // Card actions
+        document.getElementById('fleet-grid')?.addEventListener('click', (e) => {
+            const viewBtn = e.target.closest('[data-view-id]');
+            const manageBtn = e.target.closest('[data-manage-id]');
+            if (viewBtn) {
+                    const car = getCarById(viewBtn.dataset.viewId);
+                    if (car) {
+                        // Navigate to a dedicated details page instead of opening modal
+                        window.location.href = `../admin/car-detail.html?id=${encodeURIComponent(car.id)}`;
+                    }
+                    return;
+                }
+            if (manageBtn) {
+                const car = getCarById(manageBtn.dataset.manageId);
+                if (car) openVehicleModal('edit', car);
+            }
         });
 
         // Form submit
@@ -334,18 +420,18 @@
                 try {
                     if (hasSelectedImage) {
                         if (!imageFile.type.startsWith('image/')) {
-                            alert('Please select a valid image file (JPEG, PNG, or WebP)');
+                            window.AdminUI?.toast('Please select a valid image file (JPEG, PNG, or WebP)');
                             return;
                         }
                         if (imageFile.size > 10 * 1024 * 1024) {
-                            alert('Image file must be smaller than 10 MB');
+                            window.AdminUI?.toast('Image file must be smaller than 10 MB');
                             return;
                         }
                         try {
                             const imgUploadRes = await window.API.uploadImage(imageFile, 'car');
                             if (imgUploadRes && imgUploadRes.success) imageUrl = imgUploadRes.data.url;
                         } catch (uploadError) {
-                            alert('Failed to upload image: ' + (uploadError.message || 'Unknown error'));
+                            window.AdminUI?.toast('Failed to upload image: ' + (uploadError.message || 'Unknown error'));
                             return;
                         }
                     }
@@ -373,11 +459,11 @@
                         addVehicleModal.close();
                         loadFleet();
                     } else {
-                        alert('Failed to save car: ' + response.message);
+                        window.AdminUI?.toast('Failed to save car: ' + response.message);
                     }
                 } catch (error) {
                     console.error('Error submitting form:', error);
-                    alert(error?.message || 'An unexpected error occurred. Please try again.');
+                    window.AdminUI?.toast(error?.message || 'An unexpected error occurred. Please try again.');
                 }
             });
         }

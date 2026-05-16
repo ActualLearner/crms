@@ -89,7 +89,7 @@
 			await window.API.extendBooking(booking.id, dateInput.value);
 			form.innerHTML = '<div class="flow-alert success">Extension requested successfully.</div><a class="flow-button primary" href="./bookings.html">Back to bookings</a>';
 		} catch (error) {
-			window.alert(error.message || 'Unable to request extension.');
+			window.UIUtils?.toast(error.message || 'Unable to request extension.', 'error');
 			submit.disabled = false;
 		}
 	});

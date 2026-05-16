@@ -235,7 +235,11 @@
             const cancelButton = event.target.closest('[data-cancel]');
 
             if (cancelButton) {
-                if (!window.confirm('Cancel this booking?')) {
+                const confirmed = await window.UIUtils?.ask('Cancel this booking?', {
+                    title: 'Cancel booking',
+                    confirmText: 'Cancel booking',
+                });
+                if (!confirmed) {
                     return;
                 }
                 cancelButton.disabled = true;
@@ -243,7 +247,7 @@
                     await window.API.cancelBooking(cancelButton.dataset.cancel);
                     await loadBookings();
                 } catch (error) {
-                    window.alert(error.message || 'Unable to cancel booking.');
+                    window.UIUtils?.toast(error.message || 'Unable to cancel booking.', 'error');
                     cancelButton.disabled = false;
                 }
             }

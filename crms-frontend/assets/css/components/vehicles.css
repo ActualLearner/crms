@@ -164,7 +164,7 @@
 
 .vehicles-content {
 	min-width: 0;
-	padding: var(--space-6) var(--space-8) var(--space-8);
+	padding: var(--space-6) clamp(var(--space-4), 3vw, var(--space-10)) var(--space-8);
 	overflow: auto;
 }
 
@@ -199,8 +199,8 @@
 
 .vehicle-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-	gap: var(--space-4);
+	grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+	gap: var(--space-5);
 }
 
 .vehicle-card {
@@ -253,13 +253,13 @@
 
 .vehicle-media {
 	position: relative;
-	aspect-ratio: 16 / 9;
+	aspect-ratio: 16 / 10;
 	background:
 		radial-gradient(circle at 50% 78%, hsl(0 0% 84%), transparent 34%),
 		linear-gradient(180deg, hsl(0 0% 99%), hsl(0 0% 93%));
 	display: grid;
 	place-items: center;
-	padding: var(--space-7) var(--space-4) var(--space-4);
+	padding: var(--space-8) var(--space-5) var(--space-5);
 	overflow: hidden;
 }
 
@@ -514,7 +514,7 @@
 	}
 
 	.vehicles-page {
-		grid-template-columns: 256px minmax(0, 1fr);
+		grid-template-columns: 264px minmax(0, 1fr);
 	}
 
 	.vehicle-grid {
@@ -592,6 +592,10 @@
 
 	.vehicle-grid {
 		grid-template-columns: 1fr;
+	}
+
+	.vehicle-media {
+		aspect-ratio: 16 / 9;
 	}
 }
 

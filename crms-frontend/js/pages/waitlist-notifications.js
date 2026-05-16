@@ -1,79 +1,104 @@
 (() => {
 	const F = window.CustomerFlow;
 	const notifications = document.querySelector('[data-notifications]');
-	const waitlistCars = document.querySelector('[data-waitlist-cars]');
+	const markRead = document.querySelector('[data-mark-read]');
+	let waitlistCars = [];
 
-	function renderNotifications(user) {
-		if (user?.has_notification) {
-			notifications.innerHTML = `
-				<article class="notification-item">
-					<div class="notification-icon">!</div>
-					<div>
-						<strong>${F.escapeHtml(user.notification_car)}</strong>
-						<p class="flow-muted">Open the fleet to book it before someone else does.</p>
-					</div>
-				</article>`;
-			return;
-		}
-		notifications.innerHTML = `
-			<article class="notification-item">
-				<div class="notification-icon">i</div>
-				<div>
-					<strong>No availability alerts right now</strong>
-					<p class="flow-muted">When a watched car becomes available, it will show here.</p>
-				</div>
-			</article>`;
+	function icon(type) {
+		const paths = {
+			available: '<path d="M5 17h14l-1.3-5.2A3 3 0 0 0 14.8 9H9.2a3 3 0 0 0-2.9 2.8L5 17Z"></path><path d="M7 17v2"></path><path d="M17 17v2"></path>',
+			waiting: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path>',
+			info: '<circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01"></path><path d="M11 12h1v4h1"></path>',
+		};
+		return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[type] || paths.info}</svg>`;
 	}
 
-	function renderCars(cars) {
-		if (!cars.length) {
-			waitlistCars.innerHTML = '<div class="flow-alert">You are not waiting for any vehicles yet. Open an unavailable car and choose Join waitlist.</div>';
-			return;
+	function todayLabel() {
+		return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date());
+	}
+
+	function render(user) {
+		const rows = [];
+		if (user?.has_notification) {
+			rows.push({
+				type: 'available',
+				title: 'Vehicle available',
+				copy: `${user.notification_car} is ready for booking.`,
+				date: todayLabel(),
+				unread: true,
+			});
 		}
-		waitlistCars.innerHTML = cars.map(car => {
+
+		waitlistCars.forEach((car) => {
 			const available = car.status === 'available' || Number(car.notified) === 1;
-			return `
-			<article class="waitlist-item">
-				<div class="flow-thumb">${F.image(car)}</div>
-				<div>
-					<strong>${F.escapeHtml(car.brand)} ${F.escapeHtml(car.model)}</strong>
-					<p class="flow-muted">${F.escapeHtml(car.category || 'Vehicle')} · ${F.money(car.daily_rate)} / day · ${F.escapeHtml(car.status)}</p>
+			rows.push({
+				type: available ? 'available' : 'waiting',
+				title: available ? 'Vehicle available' : 'Waitlist active',
+				copy: available
+					? `${car.brand} ${car.model} is available now.`
+					: `${car.brand} ${car.model} is still being watched for you.`,
+				date: available ? todayLabel() : F.escapeHtml(car.status || 'Waiting'),
+				car,
+				unread: available,
+			});
+		});
+
+		if (!rows.length) {
+			rows.push({
+				type: 'info',
+				title: 'Welcome to Auto Ultimate',
+				copy: 'Join a vehicle waitlist and updates will appear here.',
+				date: todayLabel(),
+			});
+		}
+
+		notifications.innerHTML = rows.map((row) => `
+			<article class="notification-row ${row.unread ? 'unread' : ''}">
+				<span class="notification-icon">${icon(row.type)}</span>
+				<div class="notification-copy">
+					<strong>${F.escapeHtml(row.title)}</strong>
+					<p>${F.escapeHtml(row.copy)}</p>
+					${row.car ? `<div class="notification-actions">${row.type === 'available' ? `<a class="flow-button primary" href="./car-detail.html?id=${row.car.car_id}&book=1">Book now</a>` : ''}<button class="flow-button danger" type="button" data-leave="${row.car.car_id}">Leave</button></div>` : ''}
 				</div>
-				<div class="flow-actions">
-					${available ? `<a class="flow-button primary" href="./car-detail.html?id=${car.car_id}&book=1">Book now</a>` : '<span class="flow-badge">Waiting</span>'}
-					<button class="flow-button danger" type="button" data-leave="${car.car_id}">Leave</button>
+				<div class="notification-meta">
+					<span>${F.escapeHtml(row.date)}</span>
+					${row.unread ? '<i aria-label="Unread"></i>' : ''}
 				</div>
 			</article>
-		`;
-		}).join('');
+		`).join('');
 	}
 
 	async function init() {
 		const user = await F.requireUser();
 		if (!user) return;
 		F.logout();
-		renderNotifications(user);
 		try {
 			const res = await window.API.waitlistMine();
-			renderCars(res.data || []);
+			waitlistCars = res.data || [];
 		} catch (error) {
-			waitlistCars.innerHTML = `<div class="flow-alert danger">${F.escapeHtml(error.message || 'Unable to load saved cars.')}</div>`;
+			notifications.innerHTML = `<div class="flow-alert danger">${F.escapeHtml(error.message || 'Unable to load notifications.')}</div>`;
+			return;
 		}
+		render(user);
 	}
 
-	waitlistCars?.addEventListener('click', async event => {
+	notifications?.addEventListener('click', async event => {
 		const leave = event.target.closest('[data-leave]');
-		const btn = leave;
-		if (!btn) return;
-		btn.disabled = true;
+		if (!leave) return;
+		leave.disabled = true;
 		try {
 			await window.API.leaveWaitlist(leave.dataset.leave);
-			btn.textContent = 'Left';
 			await init();
 		} catch (error) {
-			window.alert(error.message || 'Unable to update waitlist.');
-			btn.disabled = false;
+			window.UIUtils?.toast(error.message || 'Unable to update waitlist.', 'error');
+			leave.disabled = false;
 		}
+	});
+
+	markRead?.addEventListener('click', () => {
+		document.querySelectorAll('.notification-row.unread').forEach(row => row.classList.remove('unread'));
+		document.querySelectorAll('.notification-meta i').forEach(dot => dot.remove());
+		window.UIUtils?.toast('Notifications marked as read.', 'success');
 	});
 
 	init();

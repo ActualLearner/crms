@@ -27,20 +27,16 @@
       <a class="nav-item" href="./profile.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Profile</span></a>
       <button class="nav-item nav-button" type="button" data-logout><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17 15 12l-5-5"></path><path d="M15 12H3"></path><path d="M21 3v18"></path></svg><span>Sign out</span></button>
     </aside>
-    <main class="customer-flow-page">
-      <section class="flow-header">
-        <div><h1>Waitlist & notifications</h1><p>Track unavailable cars and availability alerts.</p></div>
-        <a class="flow-button primary" href="./vehicles.html">Browse vehicles</a>
-      </section>
-      <section class="flow-grid">
-        <article class="flow-card">
-          <div><h2 class="flow-section-title">Availability alerts</h2><p class="flow-muted">Notifications from cars you asked to watch.</p></div>
-          <div class="notification-list" data-notifications></div>
-        </article>
-        <article class="flow-card">
-          <div><h2 class="flow-section-title">Your waitlist</h2><p class="flow-muted">Cars you asked to watch, with booking links when they become available.</p></div>
-          <div class="waitlist-list" data-waitlist-cars></div>
-        </article>
+    <main class="customer-flow-page notification-page">
+      <section class="notification-shell">
+        <header class="notification-head">
+          <div>
+            <h1>Notifications</h1>
+            <p>Availability alerts and waitlist updates.</p>
+          </div>
+          <button class="flow-button" type="button" data-mark-read>Mark all as read</button>
+        </header>
+        <div class="notification-list modern" data-notifications></div>
       </section>
     </main>
   </div>

@@ -88,7 +88,7 @@
 	form?.addEventListener('submit', async event => {
 		event.preventDefault();
 		if (!booking || !rating) {
-			window.alert('Choose an overall rating first.');
+			window.UIUtils?.toast('Choose an overall rating first.', 'error');
 			return;
 		}
 		const submit = form.querySelector('button[type="submit"]');
@@ -97,7 +97,7 @@
 			await window.API.submitReview(booking.id, rating, comment.value.trim());
 			form.innerHTML = '<div class="flow-alert success">Review submitted. Thanks for helping future renters.</div><a class="flow-button primary" href="./bookings.html">Back to bookings</a>';
 		} catch (error) {
-			window.alert(error.message || 'Unable to submit review.');
+			window.UIUtils?.toast(error.message || 'Unable to submit review.', 'error');
 			submit.disabled = false;
 		}
 	});

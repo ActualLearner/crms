@@ -102,7 +102,11 @@
 		if (!resolveButton) {
 			return;
 		}
-		if (!window.confirm('Resolve this report and return this car to available?')) {
+		const confirmed = await UI.ask('Resolve this report and return this car to available?', {
+			title: 'Resolve damage report',
+			confirmText: 'Resolve report',
+		});
+		if (!confirmed) {
 			return;
 		}
 		resolveButton.disabled = true;

@@ -161,7 +161,7 @@
 					state.cars = state.cars.filter((car) => Number(car.id) !== Number(removeButton.dataset.remove));
 					render();
 				} catch (error) {
-					window.alert(error.message || 'Unable to remove favourite.');
+					window.UIUtils?.toast(error.message || 'Unable to remove favourite.', 'error');
 					removeButton.disabled = false;
 				}
 			}
@@ -172,7 +172,7 @@
 					await window.API.joinWaitlist(waitlistButton.dataset.waitlist);
 					waitlistButton.textContent = 'Joined';
 				} catch (error) {
-					window.alert(error.message || 'Unable to join waitlist.');
+					window.UIUtils?.toast(error.message || 'Unable to join waitlist.', 'error');
 					waitlistButton.disabled = false;
 				}
 			}
