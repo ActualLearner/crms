@@ -148,6 +148,7 @@
 		logout: document.querySelector('[data-logout]'),
 		prevMonth: document.querySelector('[data-prev-month]'),
 		nextMonth: document.querySelector('[data-next-month]'),
+		timeNode: document.querySelector('[data-current-time]'),
 	};
 
 	function escapeHtml(value = '') {
@@ -179,6 +180,21 @@
 	function setMessage(message, type = 'info') {
 		nodes.message.textContent = message;
 		nodes.message.style.color = type === 'error' ? 'hsl(0 55% 36%)' : 'hsl(220 5% 55%)';
+	}
+
+	function updateClock() {
+		if (!nodes.timeNode) {
+			return;
+		}
+
+		nodes.timeNode.textContent = new Intl.DateTimeFormat(undefined, {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			timeZoneName: 'short',
+		}).format(new Date());
 	}
 
 	function renderImage() {
@@ -231,6 +247,13 @@
 		});
 	}
 
+	function isPastDate(dateString) {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const date = new Date(`${dateString}T00:00:00`);
+		return date < today;
+	}
+
 	function isSelected(dateString) {
 		if (dateString === state.selectedStart || dateString === state.selectedEnd) {
 			return true;
@@ -262,9 +285,11 @@
 			const date = new Date(year, monthIndex, day);
 			const dateString = formatDate(date);
 			const booked = isBooked(dateString);
+			const past = isPastDate(dateString);
 			const selected = isSelected(dateString);
 			const rangeClass = selected && dateString !== state.selectedStart && dateString !== state.selectedEnd ? 'in-range' : '';
-			html += `<button class="calendar-cell ${booked ? 'booked' : ''} ${selected ? 'selected' : ''} ${rangeClass}" type="button" data-date="${dateString}" ${booked ? 'disabled' : ''}>${day}</button>`;
+			const disabled = booked || past;
+			html += `<button class="calendar-cell ${booked ? 'booked' : ''} ${past ? 'past' : ''} ${selected ? 'selected' : ''} ${rangeClass}" type="button" data-date="${dateString}" ${disabled ? 'disabled' : ''}>${day}</button>`;
 		}
 
 		nodes.calendar.innerHTML = html;
@@ -465,4 +490,6 @@
 
 	bindEvents();
 	loadPage();
+	updateClock();
+	setInterval(updateClock, 30000);
 })();

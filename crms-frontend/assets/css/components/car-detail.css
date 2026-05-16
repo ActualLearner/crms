@@ -328,6 +328,13 @@
 	cursor: not-allowed;
 }
 
+.calendar-cell.past {
+	background: hsl(0 0% 85%);
+	color: hsl(0 0% 65%);
+	cursor: not-allowed;
+	text-decoration: line-through;
+}
+
 .calendar-cell.selected {
 	background: var(--brand-dark);
 	color: var(--brand-light);
