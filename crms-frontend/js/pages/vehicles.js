@@ -8,7 +8,6 @@
 	const sortSelect = document.querySelector('[data-sort]');
 	const filterToggle = document.querySelector('[data-filter-toggle]');
 	const logoutButton = document.querySelector('[data-logout]');
-	const timeNode = document.querySelector('[data-current-time]');
 
 	const state = {
 		page: 1,
@@ -20,18 +19,6 @@
 		isLoading: false,
 		carsController: null,
 	};
-
-	function updateClock() {
-		if (!timeNode) {
-			return;
-		}
-
-		timeNode.textContent = new Intl.DateTimeFormat(undefined, {
-			hour: '2-digit',
-			minute: '2-digit',
-			timeZoneName: 'short',
-		}).format(new Date());
-	}
 
 	function normalizeCategory(value = '') {
 		const category = value.toLowerCase();
@@ -341,8 +328,6 @@
 	}
 
 	async function init() {
-		updateClock();
-		setInterval(updateClock, 30000);
 		bindEvents();
 		await requireCustomerSession();
 		await loadFavourites();

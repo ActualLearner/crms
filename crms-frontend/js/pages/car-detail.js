@@ -114,6 +114,7 @@
 		car: null,
 		bookedRanges: [],
 		favourites: new Set(),
+		currentUser: null,
 		selectedStart: '',
 		selectedEnd: '',
 		discount: 0,
@@ -148,7 +149,6 @@
 		logout: document.querySelector('[data-logout]'),
 		prevMonth: document.querySelector('[data-prev-month]'),
 		nextMonth: document.querySelector('[data-next-month]'),
-		timeNode: document.querySelector('[data-current-time]'),
 	};
 
 	function escapeHtml(value = '') {
@@ -180,6 +180,24 @@
 	function setMessage(message, type = 'info') {
 		nodes.message.textContent = message;
 		nodes.message.style.color = type === 'error' ? 'hsl(0 55% 36%)' : 'hsl(220 5% 55%)';
+	}
+
+	function isLicenseVerified(user = state.currentUser) {
+		return Number(user?.license_verified) === 1;
+	}
+
+	function setBookingFormEnabled(enabled) {
+		if (!nodes.form) {
+			return;
+		}
+
+		nodes.form.querySelectorAll('input, button, select, textarea').forEach((node) => {
+			if (node === nodes.favourite) {
+				return;
+			}
+			node.disabled = !enabled;
+		});
+		nodes.form.classList.toggle('is-disabled', !enabled);
 	}
 
 	function updateClock() {
@@ -367,6 +385,7 @@
 
 		try {
 			const me = await window.API.me();
+			state.currentUser = me.data;
 			window.AppState?.setUser(me.data);
 			const [carResponse, availabilityResponse] = await Promise.all([
 				window.API.car(carId),
@@ -378,6 +397,13 @@
 			state.visibleMonth = new Date();
 			renderDetails();
 			renderCalendar();
+			if (!isLicenseVerified()) {
+				nodes.form.style.display = '';
+				setBookingFormEnabled(false);
+				setMessage('Your driver license is pending verification. Booking is unlocked after admin approval.', 'error');
+			} else {
+				setBookingFormEnabled(true);
+			}
 			await renderConditionalUI();
 		} catch (error) {
 			if (error.message?.includes('Unauthenticated')) {
@@ -466,6 +492,11 @@
 			}
 
 			try {
+				if (!isLicenseVerified()) {
+					setMessage('Your driver license must be verified before you can book.', 'error');
+					return;
+				}
+
 				const response = await window.API.createBooking({
 					car_id: Number(carId),
 					start_date: start,

@@ -88,6 +88,14 @@
 	body?.addEventListener('click', async event => {
 		const btn = event.target.closest('[data-verify]');
 		if (!btn) return;
+		const isUnverify = btn.textContent.trim().toLowerCase().startsWith('unverify');
+		if (isUnverify) {
+			const confirmed = await UI.ask('Remove verification from this customer? They will no longer be able to make bookings.', {
+				title: 'Remove license verification',
+				confirmText: 'Remove verification',
+			});
+			if (!confirmed) return;
+		}
 		try {
 			await window.API.verifyLicense(btn.dataset.verify);
 			UI.toast('License status updated');
