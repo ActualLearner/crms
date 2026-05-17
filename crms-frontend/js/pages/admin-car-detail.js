@@ -12,6 +12,43 @@
   const fmt = (n) => Number(n || 0).toFixed(2);
   const getParam = (name) => new URL(window.location.href).searchParams.get(name);
 
+  /* Toast helper: prefer global UIUtils.toast, fall back to an inline toast implementation (no alert) */
+  function showToast(message, type = 'error', timeout = 3600) {
+    if (!message) return;
+    const toastFn = window.UIUtils?.toast;
+    if (toastFn) {
+      toastFn(message, type === 'error' ? 'error' : type);
+      return;
+    }
+
+    // Fallback: minimal toast implementation (non-blocking)
+    let stack = document.querySelector('[data-toast-stack]');
+    if (!stack) {
+      stack = document.createElement('div');
+      stack.className = 'toast-stack';
+      stack.dataset.toastStack = '';
+      document.body.appendChild(stack);
+    }
+
+    const item = document.createElement('div');
+    item.className = `toast-message ${type === 'error' ? 'error' : type}`;
+    item.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    item.textContent = message;
+    stack.appendChild(item);
+    requestAnimationFrame(() => item.classList.add('is-visible'));
+    setTimeout(() => {
+      item.classList.remove('is-visible');
+      item.addEventListener('transitionend', () => item.remove(), { once: true });
+    }, timeout);
+  }
+
+  function showInlineMessage(text, tone = 'danger', timeout = 6000) {
+    // Keep backwards compatibility but show a toast instead of alert
+    showToast(text, tone === 'danger' ? 'error' : 'info', Math.max(timeout, 1200));
+  }
+
+  function clearInlineMessage() { /* no-op for toast-based messages */ }
+
   /* Keep a reference to the car currently being edited */
   let _currentCar = null;
   let _editingImageUrl = '';
@@ -205,11 +242,11 @@
       if (res && res.success) {
         window.location.href = './fleet.html';
       } else {
-        alert(res?.message || 'Failed to delete vehicle.');
+        showToast(res?.message || 'Failed to delete vehicle.', 'error');
       }
     } catch (err) {
       console.error('[car-detail] delete error:', err);
-      alert(err.message || 'Delete failed.');
+      showToast(err.message || 'Delete failed.', 'error');
     }
   }
 
@@ -233,11 +270,11 @@
       if (res && res.success) {
         load(); // reload to reflect new status
       } else {
-        alert(res?.message || 'Failed to change status.');
+        showToast(res?.message || 'Failed to change status.', 'error');
       }
     } catch (err) {
       console.error('[car-detail] status change error:', err);
-      alert(err.message || 'Status change failed.');
+      showToast(err.message || 'Status change failed.', 'error');
     }
   }
 
@@ -358,11 +395,11 @@
       /* Upload new image if one was selected */
       if (imageFile && imageFile.size > 0) {
         if (!imageFile.type.startsWith('image/')) {
-          alert('Please select a valid image file (PNG or JPG).');
+          showToast('Please select a valid image file (PNG or JPG).', 'error');
           return;
         }
         if (imageFile.size > 10 * 1024 * 1024) {
-          alert('Image must be smaller than 10 MB.');
+          showToast('Image must be smaller than 10 MB.', 'error');
           return;
         }
         const uploadRes = await window.API.uploadImage(imageFile, 'car');
@@ -399,7 +436,7 @@
       }
     } catch (err) {
       console.error('[car-detail] save error:', err);
-      alert(err.message || 'Save failed.');
+      showToast(err.message || 'Save failed.', 'error');
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Save changes';
