@@ -509,14 +509,16 @@
 			}
 		});
 
-		nodes.logout.addEventListener('click', async () => {
-			try {
-				await window.API.logout();
-			} finally {
-				window.AppState?.clearUser();
-				window.location.replace('../auth/login.html');
-			}
-		});
+		if (nodes.logout) {
+			nodes.logout.addEventListener('click', async () => {
+				try {
+					await window.API.logout();
+				} finally {
+					window.AppState?.clearUser();
+					window.location.replace('../auth/login.html');
+				}
+			});
+		}
 	}
 
 	bindEvents();
