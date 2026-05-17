@@ -39,6 +39,8 @@ services:
       - api
     ports:
       - "8080:80"
+    volumes:
+      - ./crms-frontend:/usr/share/nginx/html:ro
 
 volumes:
   crms_db:

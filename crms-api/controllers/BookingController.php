@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once ROOT . '/models/Booking.php';
 require_once ROOT . '/models/Car.php';
 require_once ROOT . '/models/Promo.php';
+require_once ROOT . '/models/User.php';
 
 class BookingController extends Controller
 {
@@ -34,6 +35,11 @@ class BookingController extends Controller
         }
         if ($days < 1) {
             $this->error('Minimum rental is 1 day', 422);
+        }
+
+        $user = User::find($this->userId());
+        if (!$user || (int) $user['license_verified'] !== 1) {
+            $this->error('Your driver license must be verified before booking', 403);
         }
 
         DB::beginTransaction();
@@ -125,7 +131,6 @@ class BookingController extends Controller
 
             DB::commit();
             $this->success($booking, 'Booking created successfully', 201);
-
         } catch (Throwable $e) {
             DB::rollback();
             throw $e;
@@ -140,9 +145,14 @@ class BookingController extends Controller
         $bookings = DB::table('bookings')
             ->select([
                 'bookings.*',
-                'cars.brand', 'cars.model', 'cars.year',
-                'cars.image_url', 'cars.category', 'cars.seats',
-                'cars.transmission', 'cars.penalty_rate',
+                'cars.brand',
+                'cars.model',
+                'cars.year',
+                'cars.image_url',
+                'cars.category',
+                'cars.seats',
+                'cars.transmission',
+                'cars.penalty_rate',
             ])
             ->join('cars', 'bookings.car_id', 'cars.id')
             ->where('bookings.user_id', $this->userId())
@@ -182,7 +192,10 @@ class BookingController extends Controller
     public function extend(string $id): void
     {
         $data    = $this->body();
-        $errors  = Validator::make($data, ['new_end_date' => 'required|date']);
+        $errors  = Validator::make($data, [
+            'new_end_date' => 'required|date',
+            'condition'    => 'required|in:good,excellent,damaged',
+        ]);
         if ($errors) {
             $this->error('Validation failed', 422, $errors);
         }
@@ -240,8 +253,12 @@ class BookingController extends Controller
         $query = DB::table('bookings')
             ->select([
                 'bookings.*',
-                'cars.brand', 'cars.model', 'cars.image_url', 'cars.penalty_rate',
-                'users.name as customer_name', 'users.email as customer_email',
+                'cars.brand',
+                'cars.model',
+                'cars.image_url',
+                'cars.penalty_rate',
+                'users.name as customer_name',
+                'users.email as customer_email',
             ])
             ->join('cars', 'bookings.car_id', 'cars.id')
             ->join('users', 'bookings.user_id', 'users.id')

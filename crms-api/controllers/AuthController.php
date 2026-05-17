@@ -89,7 +89,11 @@ class AuthController extends Controller
     // GET /auth/me
     public function me(): void
     {
-        $user = $this->user();
+        $user = User::find($this->userId());
+        if (!$user) {
+            $this->error('User not found', 404);
+        }
+        unset($user['password']);
 
         // Check for waitlist notifications
         $notification = DB::table('waitlist')

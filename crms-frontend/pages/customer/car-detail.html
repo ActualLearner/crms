@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,8 +12,9 @@
   <link rel="stylesheet" href="../../assets/css/layout.css" />
   <link rel="stylesheet" href="../../assets/css/components/ai-widget.css" />
 </head>
+
 <body>
-    <div class="app-shell" data-page="vehicles">
+  <div class="app-shell" data-page="vehicles">
     <header class="app-topbar">
       <a class="app-brand" href="./vehicles.html" aria-label="Auto Ultimate home">
         <span class="brand-icon" aria-hidden="true">
@@ -22,27 +24,40 @@
         </span>
         <span class="brand-text"><span>AUTO</span><span>ULTIMATE</span></span>
       </a>
-      <div class="topbar-meta" aria-label="Session context">
-        <span data-current-time>--:--</span>
-      </div>
-      <button class="avatar-button" type="button" data-logout aria-label="Logout">JD</button>
     </header>
 
     <aside class="customer-nav" aria-label="Customer navigation">
       <a class="nav-item active" href="./vehicles.html">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14l-1.3-5.2A3 3 0 0 0 14.8 9H9.2a3 3 0 0 0-2.9 2.8L5 17Z"></path><path d="M7 17v2"></path><path d="M17 17v2"></path><path d="M8 13h8"></path></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 17h14l-1.3-5.2A3 3 0 0 0 14.8 9H9.2a3 3 0 0 0-2.9 2.8L5 17Z"></path>
+          <path d="M7 17v2"></path>
+          <path d="M17 17v2"></path>
+          <path d="M8 13h8"></path>
+        </svg>
         <span>Vehicles</span>
       </a>
       <a class="nav-item" href="./bookings.html">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M9 8h6"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="4" width="14" height="16" rx="2"></rect>
+          <path d="M9 8h6"></path>
+          <path d="M9 12h6"></path>
+          <path d="M9 16h4"></path>
+        </svg>
         <span>Bookings</span>
       </a>
       <a class="nav-item" href="./favourites.html">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.6a5.5 5.5 0 0 0-9.1-3.9L12 5l.3-.3a5.5 5.5 0 0 1 7.8 7.8L12 20.5l-8.1-8a5.5 5.5 0 0 1 7.8-7.8L12 5"></path></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M20.8 8.6a5.5 5.5 0 0 0-9.1-3.9L12 5l.3-.3a5.5 5.5 0 0 1 7.8 7.8L12 20.5l-8.1-8a5.5 5.5 0 0 1 7.8-7.8L12 5">
+          </path>
+        </svg>
         <span>Favourites</span>
       </a>
       <a class="nav-item" href="./profile.html">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 21a8 8 0 0 0-16 0"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
         <span>Profile</span>
       </a>
     </aside>
@@ -59,7 +74,11 @@
           <div class="detail-gallery">
             <span class="status-pill" data-status>Available</span>
             <button class="favourite-button detail-heart" type="button" data-favourite aria-label="Add to favourites">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.6a5.5 5.5 0 0 0-9.1-3.9L12 5l.3-.3a5.5 5.5 0 0 1 7.8 7.8L12 20.5l-8.1-8a5.5 5.5 0 0 1 7.8-7.8L12 5"></path></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M20.8 8.6a5.5 5.5 0 0 0-9.1-3.9L12 5l.3-.3a5.5 5.5 0 0 1 7.8 7.8L12 20.5l-8.1-8a5.5 5.5 0 0 1 7.8-7.8L12 5">
+                </path>
+              </svg>
             </button>
             <div class="gallery-stage" data-gallery-stage></div>
             <div class="gallery-tabs" aria-label="Image views">
@@ -166,4 +185,5 @@
   <script src="../../js/pages/car-detail.js" defer></script>
   <script src="../../assets/js/components/aiChat.js" defer></script>
 </body>
+
 </html>
