@@ -185,6 +185,7 @@ class CarController extends Controller
     }
 
     // DELETE /cars/:id  (admin)
+
 public function destroy(string $id): void
 {
     if (!Car::find((int) $id)) {
@@ -210,7 +211,6 @@ public function destroy(string $id): void
         DB::table('damage_reports')->whereIn('booking_id', $bookingIds)->delete();
     }
 
-    DB::table('reviews')->where('car_id', (int) $id)->delete();
     DB::table('favourites')->where('car_id', (int) $id)->delete();
     DB::table('waitlist')->where('car_id', (int) $id)->delete();
     DB::table('bookings')->where('car_id', (int) $id)->delete();
