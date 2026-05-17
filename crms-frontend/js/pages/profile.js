@@ -22,7 +22,9 @@
 				document.querySelectorAll('[data-user-license-expiry]').forEach(el => el.textContent = textOrPlaceholder(user.license_expiry ?? user.license_expires_at));
 				document.querySelectorAll('[data-user-license-status]').forEach(el => el.textContent = verified ? 'License verified' : 'License pending verification');
 				document.querySelectorAll('[data-user-license-verified]').forEach(el => el.textContent = verified ? 'Verified' : 'Pending verification');
-
+				const initials = (user.name || '').trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
+                document.querySelectorAll('[data-user-initials]').forEach(el => el.textContent = initials);
+			
             const notificationPanel = document.querySelector('#notifications .profile-note');
             if (notificationPanel) {
                 try {
