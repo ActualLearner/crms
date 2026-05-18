@@ -77,13 +77,14 @@ class AuthController extends Controller
         $isProduction = (env('APP_ENV') === 'production');
 
         if ($rememberMe) {
-            setcookie('crms_remember', '1', [
-                'expires'  => time() + 60 * 60 * 24 * 30,
-                'secure'   => $isProduction,
-                'httponly' => true,
-                'samesite' => $isProduction ? 'Strict' : 'Lax',
-            ]);
-        }
+    setcookie('crms_remember', '1', [
+        'expires'  => time() + 60 * 60 * 24 * 30,
+        'path'     => '/',
+        'secure'   => $isProduction,
+        'httponly' => true,
+        'samesite' => $isProduction ? 'Strict' : 'Lax',
+    ]);
+}
 
         session_regenerate_id(true);
 
@@ -97,11 +98,12 @@ class AuthController extends Controller
     public function logout(): void
     {
         setcookie('crms_remember', '', [
-            'expires'  => time() - 3600,
-            'secure'   => env('APP_ENV') === 'production',
-            'httponly' => true,
-            'samesite' => env('APP_ENV') === 'production' ? 'Strict' : 'Lax',
-        ]);
+    'expires'  => time() - 3600,
+    'path'     => '/',
+    'secure'   => env('APP_ENV') === 'production',
+    'httponly' => true,
+    'samesite' => env('APP_ENV') === 'production' ? 'Strict' : 'Lax',
+]);
         session_destroy();
         $this->success(null, 'Logged out successfully');
     }
