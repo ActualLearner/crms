@@ -51,6 +51,7 @@ class AuthController extends Controller
     }
 
     // POST /auth/login
+    // POST /auth/login
     public function login(): void
     {
         $this->ensureGuest();
@@ -73,27 +74,34 @@ class AuthController extends Controller
             $this->error('Invalid email or password', 401);
         }
 
-        $rememberMe = $data['remember_me'] ?? false;
+        $rememberMe   = $data['remember_me'] ?? false;
         $isProduction = (env('APP_ENV') === 'production');
 
-        if ($rememberMe) {
-    setcookie('crms_remember', '1', [
-        'expires'  => time() + 60 * 60 * 24 * 30,
-        'path'     => '/',
-        'secure'   => $isProduction,
-        'httponly' => true,
-        'samesite' => $isProduction ? 'Strict' : 'Lax',
-    ]);
-}
-
         session_regenerate_id(true);
+
+        if ($rememberMe) {
+            setcookie('crms_remember', '1', [
+                'expires'  => time() + 60 * 60 * 24 * 30,
+                'path'     => '/',
+                'secure'   => $isProduction,
+                'httponly' => true,
+                'samesite' => $isProduction ? 'Strict' : 'Lax',
+            ]);
+
+            setcookie(session_name(), session_id(), [
+                'expires'  => time() + 60 * 60 * 24 * 30,
+                'path'     => '/',
+                'secure'   => $isProduction,
+                'httponly' => true,
+                'samesite' => $isProduction ? 'Strict' : 'Lax',
+            ]);
+        }
 
         unset($user['password']);
         $_SESSION['user'] = $user;
 
         $this->success($user, 'Logged in successfully');
     }
-    // POST /auth/logout
     // POST /auth/logout
     public function logout(): void
     {
