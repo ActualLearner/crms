@@ -185,22 +185,59 @@ class CarController extends Controller
     }
 
     // DELETE /cars/:id  (admin)
+
+// DELETE /cars/:id  (admin)
     public function destroy(string $id): void
     {
         if (!Car::find((int) $id)) {
             $this->error('Car not found', 404);
         }
 
-        $active = DB::table('bookings')
-            ->where('car_id', (int) $id)
-            ->whereIn('status', ['active', 'confirmed'])
-            ->first();
+        DB::beginTransaction();
 
-        if ($active) {
-            $this->error('Cannot delete a car with active or confirmed bookings', 422);
+        try {
+            // Lock the car row to prevent concurrent bookings
+            $car = DB::table('cars')
+                ->where('id', (int) $id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$car) {
+                DB::rollback();
+                $this->error('Car not found', 404);
+            }
+
+            $active = DB::table('bookings')
+                ->where('car_id', (int) $id)
+                ->whereIn('status', ['active', 'confirmed'])
+                ->first();
+
+            if ($active) {
+                DB::rollback();
+                $this->error('Cannot delete a car with active or confirmed bookings', 422);
+            }
+
+            $bookingIds = array_column(
+                DB::table('bookings')->select(['id'])->where('car_id', (int) $id)->get(),
+                'id'
+            );
+
+            if (!empty($bookingIds)) {
+                DB::table('reviews')->whereIn('booking_id', $bookingIds)->delete();
+                DB::table('damage_reports')->whereIn('booking_id', $bookingIds)->delete();
+            }
+
+            DB::table('favourites')->where('car_id', (int) $id)->delete();
+            DB::table('waitlist')->where('car_id', (int) $id)->delete();
+            DB::table('bookings')->where('car_id', (int) $id)->delete();
+            DB::table('cars')->where('id', (int) $id)->delete();
+
+            DB::commit();
+            $this->success(null, 'Car deleted successfully');
+
+        } catch (Throwable $e) {
+            DB::rollback();
+            throw $e;
         }
-
-        DB::table('cars')->where('id', (int) $id)->delete();
-        $this->success(null, 'Car deleted successfully');
     }
 }

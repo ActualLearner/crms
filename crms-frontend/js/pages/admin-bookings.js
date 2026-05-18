@@ -258,7 +258,10 @@
 			UI.toast('Return logged');
 			await load();
 		} catch (error) {
-			UI.toast(error.message);
+			// Show error message, which includes validation errors from backend
+			const message = error.message || 'Failed to log return';
+			console.error('[return] Error details:', error);
+			UI.toast(message);
 		}
 	});
 

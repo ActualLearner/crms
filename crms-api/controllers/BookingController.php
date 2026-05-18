@@ -298,7 +298,7 @@ class BookingController extends Controller
             'condition'          => 'required|in:good,excellent,damaged',
         ]);
         if ($errors) {
-            $this->error('Validation failed', 422, $errors);
+            $this->error('Validation failed: ' . implode('; ', $errors), 422, $errors);
         }
 
         $booking = Booking::find((int) $id);
@@ -306,7 +306,7 @@ class BookingController extends Controller
             $this->error('Booking not found', 404);
         }
         if (!in_array($booking['status'], ['confirmed', 'active'], true)) {
-            $this->error('Only confirmed or active bookings can be returned', 422);
+            $this->error('Only confirmed or active bookings can be returned. Current status: ' . $booking['status'], 422);
         }
 
         $car      = Car::find((int) $booking['car_id']);
