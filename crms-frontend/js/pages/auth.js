@@ -121,6 +121,8 @@
 	async function submitLogin() {
 		const email = emailInput?.value?.trim();
 		const password = passwordInput?.value ?? '';
+		const rememberMe = form.querySelector('[name="remember"]')?.checked ?? false;
+
 
 		if (!email || !password) {
 			window.UIUtils?.showMessage(messageNode, 'Email and password are required.', 'error');
@@ -131,7 +133,7 @@
 		window.UIUtils?.showMessage(messageNode, 'Signing in...');
 
 		try {
-			await window.API.login(email, password);
+			await window.API.login(email, password, rememberMe);
 			const meResponse = await window.API.me();
 			window.AppState?.setUser(meResponse.data);
 			window.UIUtils?.showMessage(messageNode, 'Login successful. Redirecting...');

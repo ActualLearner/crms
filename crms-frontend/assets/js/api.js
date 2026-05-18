@@ -67,12 +67,12 @@
 			}
 			return `${configuredBaseUrl}${url.startsWith('/') ? url : `/${url}`}`;
 		},
-		login(email, password) {
-			return request('/auth/login', {
-				method: 'POST',
-				body: JSON.stringify({ email, password }),
-			});
-		},
+		login(email, password, rememberMe = false) {
+    return request('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, remember_me: rememberMe }),
+    });
+},
 		register(data) {
 			return request('/auth/register', {
 				method: 'POST',
