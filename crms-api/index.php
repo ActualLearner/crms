@@ -23,9 +23,11 @@ require ROOT . '/core/Model.php';
 require ROOT . '/core/Controller.php';
 require ROOT . '/core/Validator.php';
 require ROOT . '/core/Router.php';
+require ROOT . '/core/Csrf.php';
 require ROOT . '/middleware/CorsMiddleware.php';
 require ROOT . '/middleware/AuthMiddleware.php';
 require ROOT . '/middleware/RateLimitMiddleware.php';
+require ROOT . '/middleware/CsrfMiddleware.php';
 
 set_exception_handler(function (Throwable $e) {
     http_response_code(500);
@@ -40,6 +42,7 @@ set_exception_handler(function (Throwable $e) {
 });
 
 CorsMiddleware::handle();
+CsrfMiddleware::handle();
 require ROOT . '/database/schema.php';
 require ROOT . '/config/routes.php';
 Router::dispatch();

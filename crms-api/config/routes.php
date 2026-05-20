@@ -14,6 +14,7 @@ Router::get('/cars/:id',                       'CarController@show');
 Router::get('/cars/:id/availability',          'CarController@availability');
 Router::get('/cars/:id/reviews',               'CarController@reviews');
 
+Router::get('/auth/csrf',                      'AuthController@csrf');
 Router::post('/auth/register',                 'AuthController@register');
 Router::post('/auth/login',                    'AuthController@login');
 

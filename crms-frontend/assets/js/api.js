@@ -25,12 +25,39 @@
 
 	const configuredBaseUrl = resolveBaseUrl();
 
+	let csrfToken = null;
+
+	async function getCsrfToken() {
+		if (csrfToken) return csrfToken;
+		try {
+			const res = await fetch(`${configuredBaseUrl}/auth/csrf`, { credentials: 'include' });
+			const payload = await res.json();
+			if (payload && payload.data && payload.data.csrf_token) {
+				csrfToken = payload.data.csrf_token;
+			}
+		} catch (e) {
+			console.error('Failed to fetch CSRF token', e);
+		}
+		return csrfToken;
+	}
+
 	async function request(path, options = {}) {
 		const isFormData = options.body instanceof FormData;
+		const method = (options.method || 'GET').toUpperCase();
+		
+		let csrfHeaders = {};
+		if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+			const token = await getCsrfToken();
+			if (token) {
+				csrfHeaders['X-CSRF-Token'] = token;
+			}
+		}
+
 		const response = await fetch(`${configuredBaseUrl}${path}`, {
 			credentials: 'include',
 			headers: {
 				...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+				...csrfHeaders,
 				...(options.headers || {}),
 			},
 			...options,
