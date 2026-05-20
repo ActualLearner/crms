@@ -1,22 +1,4 @@
 (() => {
-	// Global DOM XSS Protection
-	function sanitizeHTML(html) {
-		if (typeof html !== 'string') return html;
-		let clean = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-		clean = clean.replace(/(\s)(on\w+\s*=)/gi, '$1data-blocked-event=');
-		clean = clean.replace(/(href|src|data)\s*=\s*(['"]?)\s*javascript:/gi, '$1=$2#');
-		return clean;
-	}
-	const originalInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-	Object.defineProperty(Element.prototype, 'innerHTML', {
-		set(value) {
-			originalInnerHTML.set.call(this, sanitizeHTML(value));
-		},
-		get() {
-			return originalInnerHTML.get.call(this);
-		}
-	});
-
 	function resolveBaseUrl() {
 		const explicitBaseUrl =
 			window.CRMS_API_BASE_URL ||
