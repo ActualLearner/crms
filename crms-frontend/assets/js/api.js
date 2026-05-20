@@ -1,4 +1,22 @@
 (() => {
+	// Global DOM XSS Protection
+	function sanitizeHTML(html) {
+		if (typeof html !== 'string') return html;
+		let clean = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+		clean = clean.replace(/(\s)(on\w+\s*=)/gi, '$1data-blocked-event=');
+		clean = clean.replace(/(href|src|data)\s*=\s*(['"]?)\s*javascript:/gi, '$1=$2#');
+		return clean;
+	}
+	const originalInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+	Object.defineProperty(Element.prototype, 'innerHTML', {
+		set(value) {
+			originalInnerHTML.set.call(this, sanitizeHTML(value));
+		},
+		get() {
+			return originalInnerHTML.get.call(this);
+		}
+	});
+
 	function resolveBaseUrl() {
 		const explicitBaseUrl =
 			window.CRMS_API_BASE_URL ||
@@ -25,12 +43,39 @@
 
 	const configuredBaseUrl = resolveBaseUrl();
 
+	let csrfToken = null;
+
+	async function getCsrfToken() {
+		if (csrfToken) return csrfToken;
+		try {
+			const res = await fetch(`${configuredBaseUrl}/auth/csrf`, { credentials: 'include' });
+			const payload = await res.json();
+			if (payload && payload.data && payload.data.csrf_token) {
+				csrfToken = payload.data.csrf_token;
+			}
+		} catch (e) {
+			console.error('Failed to fetch CSRF token', e);
+		}
+		return csrfToken;
+	}
+
 	async function request(path, options = {}) {
 		const isFormData = options.body instanceof FormData;
+		const method = (options.method || 'GET').toUpperCase();
+		
+		let csrfHeaders = {};
+		if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+			const token = await getCsrfToken();
+			if (token) {
+				csrfHeaders['X-CSRF-Token'] = token;
+			}
+		}
+
 		const response = await fetch(`${configuredBaseUrl}${path}`, {
 			credentials: 'include',
 			headers: {
 				...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+				...csrfHeaders,
 				...(options.headers || {}),
 			},
 			...options,

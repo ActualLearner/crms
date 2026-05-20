@@ -13,6 +13,12 @@ class AuthController extends Controller
         }
     }
 
+    // GET /auth/csrf
+    public function csrf(): void
+    {
+        $this->success(['csrf_token' => Csrf::getToken()]);
+    }
+
     // POST /auth/register
     public function register(): void
     {
