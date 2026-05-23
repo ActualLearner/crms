@@ -20,6 +20,15 @@ window.AdminUI = (() => {
 				const active = href.includes(page) ? ' class="active"' : '';
 				return `<a href="./${href}"${active}>${icon(path)}<span>${label}</span></a>`;
 			}).join('');
+			nav.querySelectorAll('a[href]').forEach((link) => {
+				link.addEventListener('click', (event) => {
+					if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target) {
+						return;
+					}
+					link.classList.add('is-refreshing');
+					link.setAttribute('aria-busy', 'true');
+				});
+			});
 		}
 		document.querySelector('[data-admin-menu]')?.addEventListener('click', () => {
 			shell?.classList.toggle('nav-open');

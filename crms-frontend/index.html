@@ -3,10 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRMS Frontend</title>
-  <meta http-equiv="refresh" content="0; url=./pages/auth/login.html" />
+  <title>Auto Ultimate - Car Rental Management</title>
+  <link rel="stylesheet" href="./assets/css/variables.css" />
+  <link rel="stylesheet" href="./assets/css/reset.css" />
+  <link rel="stylesheet" href="./assets/css/components.css" />
+  <link rel="stylesheet" href="./assets/css/animations.css" />
+  <link rel="stylesheet" href="./assets/css/layout.css" />
 </head>
-<body>
-  <p>Redirecting to login...</p>
+<body class="landing-page">
+  <main class="landing-shell">
+    <nav class="landing-nav" aria-label="Primary navigation">
+      <a class="landing-brand" href="./index.html" aria-label="Auto Ultimate home">
+        <span class="landing-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+        </span>
+        <span>AUTO<br />ULTIMATE</span>
+      </a>
+      <div class="landing-nav-actions">
+        <a class="landing-link" href="./pages/auth/login.html">Sign in</a>
+        <a class="landing-button" href="./pages/auth/register.html">Create account</a>
+      </div>
+    </nav>
+
+    <section class="landing-hero" aria-label="Car rental landing page">
+      <div class="landing-copy fade-up-soft">
+        <span class="landing-kicker">Rental control desk</span>
+        <h1>Book the right car without the counter wait.</h1>
+        <p>Auto Ultimate brings fleet browsing, booking updates, favourites, and customer account tools into one clean rental experience.</p>
+        <div class="landing-cta-row">
+          <a class="landing-primary" href="./pages/auth/register.html">Start booking</a>
+          <a class="landing-secondary" href="./pages/auth/login.html">I already have an account</a>
+        </div>
+        <div class="landing-stats" aria-label="Service highlights">
+          <div class="landing-stat">
+            <strong>24/7</strong>
+            <span>Reservation access</span>
+          </div>
+          <div class="landing-stat">
+            <strong>Fast</strong>
+            <span>Customer check-in</span>
+          </div>
+          <div class="landing-stat">
+            <strong>Live</strong>
+            <span>Availability updates</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="landing-visual" role="img" aria-label="Luxury rental car on an open road">
+        <div class="landing-panel">
+          <div>
+            <strong>Find your next ride</strong>
+            <span>Compare available cars and manage bookings from your dashboard.</span>
+          </div>
+          <a href="./pages/auth/register.html">Reserve now</a>
+        </div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

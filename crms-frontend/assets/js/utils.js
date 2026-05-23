@@ -35,6 +35,23 @@
 		}
 	}
 
+	function enhanceNavRefreshFeedback(root = document) {
+		root.querySelectorAll('.customer-nav a.nav-item[href]').forEach((link) => {
+			if (link.dataset.refreshFeedbackBound) {
+				return;
+			}
+
+			link.dataset.refreshFeedbackBound = 'true';
+			link.addEventListener('click', (event) => {
+				if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target) {
+					return;
+				}
+				link.classList.add('is-refreshing');
+				link.setAttribute('aria-busy', 'true');
+			});
+		});
+	}
+
 	function showMessage(target, message, type = 'info') {
 		if (!target) {
 			return;
@@ -151,6 +168,7 @@
                         toast(message, 'success');
                 },
 		showMessage,
+		enhanceNavRefreshFeedback,
 		toast,
 		ask,
 		formatDate,
@@ -159,8 +177,12 @@
 	};
 
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', ensureWaitlistNavItem);
+		document.addEventListener('DOMContentLoaded', () => {
+			ensureWaitlistNavItem();
+			enhanceNavRefreshFeedback();
+		});
 	} else {
 		ensureWaitlistNavItem();
+		enhanceNavRefreshFeedback();
 	}
 })();

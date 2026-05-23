@@ -7,9 +7,11 @@
 	const mode = form.dataset.authMode || 'login';
 	const emailInput = form.querySelector('[name="email"]');
 	const passwordInput = form.querySelector('[name="password"]');
-	const passwordToggle = form.querySelector('[data-password-toggle]');
+	const passwordToggles = form.querySelectorAll('[data-password-toggle]');
+	const passwordRules = form.querySelectorAll('[data-password-rule]');
 	const submitButtonText = mode === 'register' ? 'Create account' : 'Sign in';
 	const loadingText = mode === 'register' ? 'Creating account...' : 'Signing in...';
+	const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
 	const messageNode = document.createElement('p');
 	messageNode.setAttribute('aria-live', 'polite');
@@ -27,22 +29,22 @@
 		submitButton.textContent = isLoading ? loadingText : submitButtonText;
 	}
 
-	function setPasswordVisibility(isVisible) {
-		if (!passwordInput || !passwordToggle) {
+	function setPasswordVisibility(input, toggle, isVisible) {
+		if (!input || !toggle) {
 			return;
 		}
 
-		passwordInput.type = isVisible ? 'text' : 'password';
-		passwordToggle.setAttribute('aria-pressed', String(isVisible));
-		passwordToggle.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
+		input.type = isVisible ? 'text' : 'password';
+		toggle.setAttribute('aria-pressed', String(isVisible));
+		toggle.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
 
-		const visibleIcons = passwordToggle.querySelectorAll('.password-toggle-visible');
-		const hiddenIcons = passwordToggle.querySelectorAll('.password-toggle-hidden');
+		const visibleIcons = toggle.querySelectorAll('.password-toggle-visible');
+		const hiddenIcons = toggle.querySelectorAll('.password-toggle-hidden');
 		visibleIcons.forEach((node) => {
-			node.style.display = isVisible ? 'none' : '';
+			node.style.display = isVisible ? 'none' : 'inline';
 		});
 		hiddenIcons.forEach((node) => {
-			node.style.display = isVisible ? '' : 'none';
+			node.style.display = isVisible ? 'inline' : 'none';
 		});
 	}
 
@@ -51,12 +53,46 @@
 		window.location.replace(redirectUrl);
 	}
 
-	if (passwordToggle && passwordInput) {
-		setPasswordVisibility(false);
-		passwordToggle.addEventListener('click', () => {
-			setPasswordVisibility(passwordInput.type === 'password');
-			passwordInput.focus();
+	passwordToggles.forEach((toggle) => {
+		const targetId = toggle.dataset.target;
+		const input = targetId ? form.querySelector(`#${CSS.escape(targetId)}`) : passwordInput;
+		if (!input) {
+			return;
+		}
+
+		setPasswordVisibility(input, toggle, false);
+		toggle.addEventListener('click', () => {
+			setPasswordVisibility(input, toggle, input.type === 'password');
+			input.focus();
 		});
+	});
+
+	function getPasswordRuleState(password = '') {
+		return {
+			length: password.length >= 8,
+			uppercase: /[A-Z]/.test(password),
+			lowercase: /[a-z]/.test(password),
+			number: /\d/.test(password),
+			symbol: /[^A-Za-z0-9]/.test(password),
+		};
+	}
+
+	function updatePasswordChecklist() {
+		if (!passwordRules.length || !passwordInput) {
+			return;
+		}
+
+		const ruleState = getPasswordRuleState(passwordInput.value);
+		passwordRules.forEach((rule) => {
+			const isValid = Boolean(ruleState[rule.dataset.passwordRule]);
+			rule.classList.toggle('is-valid', isValid);
+			rule.setAttribute('aria-label', `${rule.textContent.trim()}: ${isValid ? 'fulfilled' : 'not fulfilled'}`);
+		});
+	}
+
+	if (passwordInput && passwordRules.length) {
+		updatePasswordChecklist();
+		passwordInput.addEventListener('input', updatePasswordChecklist);
 	}
 
 	function getRegistrationPayload() {
@@ -76,8 +112,8 @@
 			return 'All fields are required.';
 		}
 
-		if (payload.password.length < 8) {
-			return 'Password must be at least 8 characters.';
+		if (!strongPasswordPattern.test(payload.password)) {
+			return 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a symbol.';
 		}
 
 		if (payload.password !== payload.confirm_password) {

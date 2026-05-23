@@ -6,6 +6,8 @@ require_once ROOT . '/models/User.php';
 
 class AuthController extends Controller
 {
+    private const STRONG_PASSWORD_PATTERN = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/';
+
     private function ensureGuest(): void
     {
         if (!empty($_SESSION['user'])) {
@@ -35,6 +37,12 @@ class AuthController extends Controller
 
         if ($errors) {
             $this->error('Validation failed', 422, $errors);
+        }
+
+        if (!preg_match(self::STRONG_PASSWORD_PATTERN, (string) $data['password'])) {
+            $this->error('Validation failed', 422, [
+                'password' => 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a symbol',
+            ]);
         }
 
         if (User::where('email', $data['email'])->first()) {
