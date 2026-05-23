@@ -108,7 +108,7 @@
 	}
 
 	function validateRegistration(payload) {
-		if (!payload.name || !payload.email || !payload.phone || !payload.license_number || !payload.password) {
+		if (!payload.name || !payload.email || !payload.phone || !payload.license_number || !payload.password || !payload.confirm_password) {
 			return 'All fields are required.';
 		}
 
