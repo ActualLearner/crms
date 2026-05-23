@@ -27,6 +27,10 @@
 
 	let csrfToken = null;
 
+	function clearCsrfToken() {
+		csrfToken = null;
+	}
+
 	async function getCsrfToken() {
 		if (csrfToken) return csrfToken;
 		try {
@@ -98,6 +102,9 @@
 			return request('/auth/login', {
 				method: 'POST',
 				body: JSON.stringify({ email, password, remember_me: rememberMe }),
+			}).then((res) => {
+				clearCsrfToken();
+				return res;
 			});
 		},
 		register(data) {
@@ -124,7 +131,10 @@
                         return res;
                 },
 		logout() {
-			return request('/auth/logout', { method: 'POST' });
+			return request('/auth/logout', { method: 'POST' }).then((res) => {
+				clearCsrfToken();
+				return res;
+			});
 		},
 		cars(params = {}) {
 			const query = new URLSearchParams();

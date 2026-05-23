@@ -139,6 +139,7 @@
 }
 
 .nav-item {
+	position: relative;
 	min-height: 44px;
 	border: 0;
 	border-radius: var(--radius-sm);
@@ -151,7 +152,10 @@
 	font-size: 15px;
 	cursor: pointer;
 	text-align: left;
-	transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+	transition:
+		background-color var(--duration-fast) var(--ease-standard),
+		color var(--duration-fast) var(--ease-standard),
+		opacity var(--duration-fast) var(--ease-standard);
 }
 
 .nav-item svg {
@@ -175,8 +179,30 @@
 	box-shadow: inset 4px 0 0 var(--text-primary);
 }
 
+.nav-item.is-refreshing {
+	color: var(--text-primary);
+	background: hsl(0 0% 91%);
+	pointer-events: none;
+}
+
+.nav-item.is-refreshing::after {
+	content: "";
+	width: 14px;
+	height: 14px;
+	margin-left: auto;
+	border: 2px solid hsl(220 8% 8% / 0.18);
+	border-top-color: currentColor;
+	border-radius: 999px;
+	animation: nav-refresh-spin 720ms linear infinite;
+}
+
+@keyframes nav-refresh-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 .nav-button {
 	margin-top: auto;
 	width: 100%;
 }
-
