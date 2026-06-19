@@ -12,6 +12,9 @@ class BookingController extends Controller
     // POST /bookings
     public function store(): void
     {
+        // Free any abandoned holds first so their dates don't block this booking.
+        Booking::releaseExpiredHolds();
+
         $data   = $this->body();
         $errors = Validator::make($data, [
             'car_id'     => 'required|integer',
@@ -115,11 +118,12 @@ class BookingController extends Controller
             $discountAmt  = round($baseTotal * $discount / 100, 2);
             $finalTotal   = round($baseTotal - $discountAmt, 2);
 
+            $reference = generateRef();
             $booking = Booking::create([
                 'user_id'              => $this->userId(),
                 'car_id'               => (int) $car['id'],
                 'promo_id'             => $promoId,
-                'reference_number'     => generateRef(),
+                'reference_number'     => $reference,
                 'start_date'           => $start,
                 'end_date'             => $end,
                 'expected_return_date' => $end,
@@ -127,6 +131,9 @@ class BookingController extends Controller
                 'base_total'           => $baseTotal,
                 'discount_amount'      => $discountAmt,
                 'final_total'          => $finalTotal,
+                'payment_provider'     => 'chapa',
+                'payment_status'       => 'unpaid',
+                'payment_tx_ref'       => $reference,
             ]);
 
             DB::commit();
@@ -140,6 +147,8 @@ class BookingController extends Controller
     // GET /bookings/mine
     public function mine(): void
     {
+        Booking::releaseExpiredHolds();
+
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
         $bookings = DB::table('bookings')
@@ -173,17 +182,15 @@ class BookingController extends Controller
         if ((int) $booking['user_id'] !== $this->userId()) {
             $this->error('You can only cancel your own bookings', 403);
         }
-        if (!in_array($booking['status'], ['pending', 'confirmed'], true)) {
-            $this->error('Only pending or confirmed bookings can be cancelled', 422);
+        // Only an unpaid hold can be cancelled. Once paid the car is reserved and the
+        // payment record must be kept; cancelling such a booking is out of scope here.
+        if ($booking['status'] !== 'pending' || $booking['payment_status'] === 'paid') {
+            $this->error('Only unpaid bookings awaiting payment can be cancelled', 422);
         }
 
-        DB::table('bookings')->where('id', (int) $id)->update(['status' => 'cancelled']);
-
-        // Free up the car
-        DB::table('cars')
-            ->where('id', (int) $booking['car_id'])
-            ->where('status', 'rented')
-            ->update(['status' => 'available']);
+        // Drop the hold entirely (and give back any promo use) so it disappears from
+        // the customer's bookings instead of lingering as a cancelled record.
+        Booking::deleteHold((int) $id, $booking['promo_id'] !== null ? (int) $booking['promo_id'] : null);
 
         $this->success(null, 'Booking cancelled successfully');
     }
@@ -248,6 +255,8 @@ class BookingController extends Controller
     // GET /bookings  (admin)
     public function index(): void
     {
+        Booking::releaseExpiredHolds();
+
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
         $query = DB::table('bookings')
@@ -269,24 +278,6 @@ class BookingController extends Controller
         }
 
         $this->success($query->paginate(15, $page));
-    }
-
-    // PUT /bookings/:id/confirm  (admin)
-    public function confirm(string $id): void
-    {
-        $booking = Booking::find((int) $id);
-
-        if (!$booking) {
-            $this->error('Booking not found', 404);
-        }
-        if ($booking['status'] !== 'pending') {
-            $this->error('Only pending bookings can be confirmed', 422);
-        }
-
-        DB::table('bookings')->where('id', (int) $id)->update(['status' => 'confirmed']);
-        DB::table('cars')->where('id', (int) $booking['car_id'])->update(['status' => 'rented']);
-
-        $this->success(Booking::find((int) $id), 'Booking confirmed');
     }
 
     // PUT /bookings/:id/return  (admin)

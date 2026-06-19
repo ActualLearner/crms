@@ -81,14 +81,14 @@
       </nav>
 
       <section class="confirmation-hero">
-        <div class="success-mark" aria-hidden="true">
+        <div class="success-mark" aria-hidden="true" data-success-mark hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
             stroke-linejoin="round">
             <path d="M20 6 9 17l-5-5"></path>
           </svg>
         </div>
-        <h1>Booking confirmed!</h1>
-        <p data-hero-copy>Your booking is pending admin confirmation. You'll be notified shortly.</p>
+        <h1 data-hero-title>Complete your booking</h1>
+        <p data-hero-copy>Pay securely with Chapa to confirm your reservation.</p>
         <button class="reference-pill" type="button" data-copy-reference>
           <span>REF.</span>
           <strong data-reference>Loading...</strong>
@@ -96,10 +96,16 @@
         </button>
       </section>
 
-      <section class="notice-card">
+      <section class="notice-card" data-hold-banner hidden>
         <span aria-hidden="true"></span>
-        <p><strong>Pending admin confirmation</strong> — We'll review your booking and send a confirmation email to
-          <span data-user-email>your email</span> within 1–2 hours.</p>
+        <p><strong>Dates held — <span data-hold-timer>10:00</span> left.</strong> Complete payment to confirm your
+          booking. We'll email the confirmation to <span data-user-email>your email</span>.</p>
+      </section>
+
+      <section class="notice-card notice-danger" data-expired-banner hidden>
+        <span aria-hidden="true"></span>
+        <p><strong>Reservation expired.</strong> Your 10-minute hold ended before payment completed.
+          <a data-rebook-link href="./vehicles.html">Book this car again</a> to get fresh dates.</p>
       </section>
 
       <section class="summary-card vehicle-summary">
@@ -118,6 +124,27 @@
               <span data-seats>5 seats</span>
               <span data-power>250 hp</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-card payment-summary">
+        <div class="summary-card-head">
+          <h2>Payment</h2>
+          <span class="status-pill inline" data-payment-status>Unpaid</span>
+        </div>
+        <div class="payment-summary-body">
+          <div>
+            <span>Provider</span>
+            <strong>Chapa</strong>
+          </div>
+          <div>
+            <span>Transaction ref</span>
+            <strong data-payment-tx-ref>--</strong>
+          </div>
+          <div class="payment-actions">
+            <button class="btn-secondary" type="button" data-pay-chapa>Pay with Chapa</button>
+            <button class="btn-quiet" type="button" data-verify-payment>Refresh status</button>
           </div>
         </div>
       </section>
@@ -174,7 +201,7 @@
         <a class="btn-secondary" href="./bookings.html">View my bookings</a>
         <a class="btn-quiet" href="./vehicles.html">Browse more cars</a>
       </div>
-      <p class="confirmation-note">You won't be charged until admin confirms your booking.</p>
+      <p class="confirmation-note">Chapa will redirect you back here after checkout. Use refresh status if the payment status has not updated yet.</p>
     </main>
   </div>
 

@@ -27,6 +27,14 @@ services:
       DB_PASS: crms_password
       RATE_LIMIT: 5
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      CHAPA_BASE_URL: ${CHAPA_BASE_URL:-https://api.chapa.co}
+      CHAPA_SECRET_KEY: ${CHAPA_SECRET_KEY:-}
+      CHAPA_WEBHOOK_SECRET: ${CHAPA_WEBHOOK_SECRET:-}
+      CHAPA_CURRENCY: ${CHAPA_CURRENCY:-USD}
+      API_PUBLIC_URL: ${API_PUBLIC_URL:-http://localhost:8080/api}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      CHAPA_CALLBACK_URL: ${CHAPA_CALLBACK_URL:-}
+      CHAPA_RETURN_URL: ${CHAPA_RETURN_URL:-}
     volumes:
       - crms_uploads:/var/www/html/public/uploads
 

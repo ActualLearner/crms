@@ -27,6 +27,7 @@ CRMS is a car rental management system for customers and administrators.
 - Admin dashboard for fleet, customers, bookings, promos, and damage reports
 - AI-powered recommendations and chat support
 - Booking validation and availability checks with transaction safety
+- Chapa hosted checkout integration with server-side verification and webhooks
 - Dockerized setup for local development and deployment
 
 ### Tech stack
@@ -124,7 +125,17 @@ DB_USER=crms_user
 DB_PASS=crms_password
 RATE_LIMIT=5
 GEMINI_API_KEY=your_key_here
+CHAPA_BASE_URL=https://api.chapa.co
+CHAPA_SECRET_KEY=your_chapa_secret_key_here
+CHAPA_WEBHOOK_SECRET=your_chapa_webhook_secret_here
+CHAPA_CURRENCY=USD
+API_PUBLIC_URL=http://localhost:8080/api
+FRONTEND_URL=http://localhost:8080
+CHAPA_CALLBACK_URL=
+CHAPA_RETURN_URL=
 ```
+
+Chapa supports ETB and USD; keep `CHAPA_CURRENCY` aligned with the currency used for stored car rates and frontend totals.
 
 ---
 
@@ -147,6 +158,15 @@ GEMINI_API_KEY=your_key_here
 - Handle promotions
 - Process damage reports
 - View dashboard statistics
+
+
+### Payments
+
+- A customer picks a car and dates, which creates a pending booking that holds those dates for 10 minutes.
+- They are taken straight to a checkout page and pay with Chapa hosted checkout (`data.checkout_url`).
+- Chapa callbacks and webhooks are always verified with Chapa's transaction verify endpoint before marking a booking paid; a successful payment automatically confirms the booking and reserves the car — there is no admin approval step.
+- Unpaid holds that aren't paid within 10 minutes are released automatically, freeing the dates.
+- Configure `API_PUBLIC_URL` for the public API base used by Chapa callbacks and `FRONTEND_URL` for the return page. Optional `CHAPA_CALLBACK_URL` and `CHAPA_RETURN_URL` templates support `{booking_id}`, `{tx_ref}`, and `{reference_number}`.
 
 ### Technical
 

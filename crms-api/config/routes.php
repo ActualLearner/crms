@@ -23,6 +23,10 @@ Router::post('/ai/recommend',                  'AiController@recommend');
 Router::post('/ai/chat',                       'AiController@chat');
 Router::get('/ai/reviews/:carId/summary',      'AiController@summarizeReviews');
 
+// Chapa payment callbacks from hosted checkout/webhooks
+Router::get('/payments/chapa/callback',        'PaymentController@callback');
+Router::post('/payments/chapa/webhook',        'PaymentController@webhook');
+
 // ── Auth required (logged-in customers) ───────────────────────────────────
 Router::post('/auth/logout',                   'AuthController@logout',          'auth');
 Router::get('/auth/me',                        'AuthController@me',              'auth');
@@ -32,6 +36,9 @@ Router::get('/bookings/mine',                  'BookingController@mine',        
 Router::delete('/bookings/:id',                'BookingController@cancel',       'auth');
 Router::put('/bookings/:id/extend',            'BookingController@extend',       'auth');
 Router::post('/bookings/:id/review',           'ReviewController@store',         'auth');
+
+Router::post('/payments/chapa/initialize',     'PaymentController@initialize',   'auth');
+Router::post('/payments/chapa/verify',         'PaymentController@verify',       'auth');
 
 Router::get('/favourites',                     'FavouriteController@index',      'auth');
 Router::post('/favourites/:carId',             'FavouriteController@store',      'auth');
@@ -49,7 +56,6 @@ Router::put('/cars/:id',                       'CarController@update',          
 Router::delete('/cars/:id',                    'CarController@destroy',          'admin');
 
 Router::get('/bookings',                       'BookingController@index',        'admin');
-Router::put('/bookings/:id/confirm',           'BookingController@confirm',      'admin');
 Router::put('/bookings/:id/return',            'BookingController@logReturn',    'admin');
 
 Router::get('/admin/stats',                    'AdminController@stats',          'admin');

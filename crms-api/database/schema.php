@@ -57,11 +57,46 @@ DB::raw("CREATE TABLE IF NOT EXISTS bookings (
     discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
     penalty_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
     final_total DECIMAL(10,2) NOT NULL DEFAULT 0,
+    payment_provider VARCHAR(30) NOT NULL DEFAULT 'chapa',
+    payment_status ENUM('unpaid','pending','paid','failed') NOT NULL DEFAULT 'unpaid',
+    payment_tx_ref VARCHAR(100) NULL UNIQUE,
+    payment_ref_id VARCHAR(100) NULL,
+    payment_amount DECIMAL(10,2) NULL,
+    payment_last_checked DATETIME NULL,
+    payment_meta JSON NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (car_id) REFERENCES cars(id),
     FOREIGN KEY (promo_id) REFERENCES promos(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+$bookingColumns = array_column(DB::table('INFORMATION_SCHEMA.COLUMNS')
+    ->select(['COLUMN_NAME'])
+    ->where('TABLE_SCHEMA', env('DB_NAME', 'crms'))
+    ->where('TABLE_NAME', 'bookings')
+    ->get(), 'COLUMN_NAME');
+
+if (!in_array('payment_provider', $bookingColumns, true)) {
+    DB::raw("ALTER TABLE bookings ADD payment_provider VARCHAR(30) NOT NULL DEFAULT 'chapa' AFTER final_total");
+}
+if (!in_array('payment_status', $bookingColumns, true)) {
+    DB::raw("ALTER TABLE bookings ADD payment_status ENUM('unpaid','pending','paid','failed') NOT NULL DEFAULT 'unpaid' AFTER payment_provider");
+}
+if (!in_array('payment_tx_ref', $bookingColumns, true)) {
+    DB::raw("ALTER TABLE bookings ADD payment_tx_ref VARCHAR(100) NULL UNIQUE AFTER payment_status");
+}
+if (!in_array('payment_ref_id', $bookingColumns, true)) {
+    DB::raw("ALTER TABLE bookings ADD payment_ref_id VARCHAR(100) NULL AFTER payment_tx_ref");
+}
+if (!in_array('payment_amount', $bookingColumns, true)) {
+    DB::raw("ALTER TABLE bookings ADD payment_amount DECIMAL(10,2) NULL AFTER payment_ref_id");
+}
+if (!in_array('payment_last_checked', $bookingColumns, true)) {
+    DB::raw("ALTER TABLE bookings ADD payment_last_checked DATETIME NULL AFTER payment_amount");
+}
+if (!in_array('payment_meta', $bookingColumns, true)) {
+    DB::raw("ALTER TABLE bookings ADD payment_meta JSON NULL AFTER payment_last_checked");
+}
 
 DB::raw("CREATE TABLE IF NOT EXISTS reviews (
     id INT PRIMARY KEY AUTO_INCREMENT,

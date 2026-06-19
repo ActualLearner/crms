@@ -2,11 +2,23 @@
 	const params = new URLSearchParams(window.location.search);
 	const bookingId = Number(params.get('id') || 0);
 
+	// Keep in sync with Booking::HOLD_MINUTES on the API — the dates are released
+	// server-side after this window, so the countdown is purely a UX mirror of it.
+	const HOLD_MINUTES = 10;
+	let countdownTimer = null;
+
 	const nodes = {
 		reference: document.querySelector('[data-reference]'),
 		copyReference: document.querySelector('[data-copy-reference]'),
 		userEmail: document.querySelector('[data-user-email]'),
 		status: document.querySelector('[data-status]'),
+		heroTitle: document.querySelector('[data-hero-title]'),
+		heroCopy: document.querySelector('[data-hero-copy]'),
+		successMark: document.querySelector('[data-success-mark]'),
+		holdBanner: document.querySelector('[data-hold-banner]'),
+		holdTimer: document.querySelector('[data-hold-timer]'),
+		expiredBanner: document.querySelector('[data-expired-banner]'),
+		rebookLink: document.querySelector('[data-rebook-link]'),
 		carLink: document.querySelector('[data-car-link]'),
 		vehicleMedia: document.querySelector('[data-vehicle-media]'),
 		carName: document.querySelector('[data-car-name]'),
@@ -24,6 +36,10 @@
 		discountLine: document.querySelector('[data-discount-line]'),
 		discount: document.querySelector('[data-discount]'),
 		finalTotal: document.querySelector('[data-final-total]'),
+		paymentStatus: document.querySelector('[data-payment-status]'),
+		paymentTxRef: document.querySelector('[data-payment-tx-ref]'),
+		payChapa: document.querySelector('[data-pay-chapa]'),
+		verifyPayment: document.querySelector('[data-verify-payment]'),
 		logout: document.querySelector('[data-logout]'),
 	};
 
@@ -57,6 +73,96 @@
 
 	function fallbackCar() {
 		return '<div class="detail-fallback-car" aria-hidden="true"></div>';
+	}
+
+	function paymentStatusText(status) {
+		const normalized = String(status || 'unpaid').toLowerCase();
+		if (normalized === 'paid') return 'Paid';
+		if (normalized === 'pending') return 'Payment pending';
+		if (normalized === 'failed') return 'Payment failed';
+		return 'Unpaid';
+	}
+
+	// When the 10-minute hold ends (computed from created_at, which the API returns in UTC).
+	function holdDeadline(booking) {
+		const raw = String(booking.created_at || '');
+		if (!raw) return null;
+		const created = new Date(`${raw.replace(' ', 'T')}Z`);
+		return Number.isNaN(created.getTime()) ? null : created.getTime() + HOLD_MINUTES * 60000;
+	}
+
+	function isHoldExpired(booking) {
+		const deadline = holdDeadline(booking);
+		return deadline !== null && Date.now() >= deadline;
+	}
+
+	function stopCountdown() {
+		if (countdownTimer) {
+			clearInterval(countdownTimer);
+			countdownTimer = null;
+		}
+	}
+
+	function renderPayment(booking) {
+		const status = String(booking.payment_status || 'unpaid').toLowerCase();
+		const paid = status === 'paid';
+		const expired = !paid && isHoldExpired(booking);
+
+		nodes.paymentStatus.textContent = paymentStatusText(status);
+		nodes.paymentStatus.className = `status-pill inline payment-status ${status}`;
+		nodes.paymentTxRef.textContent = booking.payment_tx_ref || booking.reference_number || '--';
+
+		nodes.payChapa.hidden = paid || expired;
+		nodes.payChapa.dataset.bookingId = booking.id;
+		nodes.verifyPayment.hidden = paid || expired;
+		nodes.verifyPayment.disabled = !booking.payment_tx_ref;
+		nodes.verifyPayment.dataset.bookingId = booking.id;
+
+		// Hero + banners reflect the three states: paid, awaiting payment, expired hold.
+		nodes.successMark.hidden = !paid;
+		nodes.holdBanner.hidden = paid || expired;
+		nodes.expiredBanner.hidden = paid || !expired;
+		if (nodes.rebookLink) {
+			nodes.rebookLink.href = `./car-detail.html?id=${booking.car_id}&book=1`;
+		}
+
+		if (paid) {
+			nodes.heroTitle.textContent = 'Booking confirmed!';
+			nodes.heroCopy.textContent = 'Payment received — your car is reserved. A confirmation is on its way to your email.';
+			stopCountdown();
+		} else if (expired) {
+			nodes.heroTitle.textContent = 'Reservation expired';
+			nodes.heroCopy.textContent = 'Your 10-minute hold ended before payment completed. Book the car again to get fresh dates.';
+			stopCountdown();
+		} else {
+			nodes.heroTitle.textContent = 'Complete your booking';
+			nodes.heroCopy.textContent = 'Pay securely with Chapa to confirm your reservation.';
+			startCountdown(booking);
+		}
+	}
+
+	function startCountdown(booking) {
+		const deadline = holdDeadline(booking);
+		stopCountdown();
+		if (deadline === null) {
+			nodes.holdTimer.textContent = `${HOLD_MINUTES}:00`;
+			return;
+		}
+
+		const tick = () => {
+			const remaining = Math.max(0, deadline - Date.now());
+			const minutes = Math.floor(remaining / 60000);
+			const seconds = Math.floor((remaining % 60000) / 1000);
+			nodes.holdTimer.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+			if (remaining <= 0) {
+				stopCountdown();
+				// Hold lapsed while the page was open — flip to the expired state.
+				renderPayment(booking);
+			}
+		};
+
+		tick();
+		countdownTimer = setInterval(tick, 1000);
 	}
 
 	function renderVehicleImage(booking) {
@@ -95,12 +201,27 @@
 		nodes.discountLine.hidden = discount <= 0;
 		nodes.discount.textContent = `-${window.UIUtils.formatMoney(discount)}`;
 		renderVehicleImage(booking);
+		renderPayment(booking);
 	}
 
 	async function findBooking() {
 		const response = await window.API.myBookings({ page: 1 });
 		const bookings = response.data?.data || [];
-		return bookings.find((booking) => Number(booking.id) === bookingId) || bookings[0];
+		// Match exactly — an expired hold is deleted server-side, so never fall back
+		// to another booking and render the wrong one on the checkout page.
+		return bookings.find((booking) => Number(booking.id) === bookingId) || null;
+	}
+
+	function renderExpiredHold() {
+		stopCountdown();
+		nodes.reference.textContent = 'Expired';
+		nodes.successMark.hidden = true;
+		nodes.holdBanner.hidden = true;
+		nodes.expiredBanner.hidden = false;
+		nodes.heroTitle.textContent = 'Reservation expired';
+		nodes.heroCopy.textContent = 'Your 10-minute hold ended before payment completed. Book the car again to get fresh dates.';
+		nodes.payChapa.hidden = true;
+		nodes.verifyPayment.hidden = true;
 	}
 
 	async function init() {
@@ -111,12 +232,22 @@
 
 			const booking = await findBooking();
 			if (!booking) {
-				nodes.reference.textContent = 'Not found';
-				nodes.carName.textContent = 'Booking not found';
+				// Either the hold already lapsed and was cleaned up, or it's not on page 1.
+				renderExpiredHold();
 				return;
 			}
 
 			renderBooking(booking);
+
+			if (params.get('payment') === 'returned' && booking.id && String(booking.payment_status || '').toLowerCase() !== 'paid') {
+				try {
+					await window.API.verifyChapaPayment({ booking_id: Number(booking.id) });
+					const refreshed = await findBooking();
+					if (refreshed) renderBooking(refreshed);
+				} catch (error) {
+					window.UIUtils?.toast(error.message || 'Unable to refresh payment status.', 'error');
+				}
+			}
 		} catch (error) {
 			if (error.message?.includes('Unauthenticated')) {
 				window.location.replace('../auth/login.html');
@@ -126,6 +257,47 @@
 			nodes.carName.textContent = error.message || 'Unable to load booking.';
 		}
 	}
+
+	nodes.payChapa.addEventListener('click', async () => {
+		const bookingIdToPay = Number(nodes.payChapa.dataset.bookingId || bookingId);
+		if (!bookingIdToPay) {
+			return;
+		}
+		nodes.payChapa.disabled = true;
+		nodes.payChapa.textContent = 'Opening Chapa...';
+		try {
+			const response = await window.API.initializeChapaPayment(bookingIdToPay);
+			const checkoutUrl = response.data?.checkout_url;
+			if (!checkoutUrl) {
+				throw new Error('Chapa did not return a checkout URL.');
+			}
+			window.location.href = checkoutUrl;
+		} catch (error) {
+			window.UIUtils?.toast(error.message || 'Unable to start Chapa checkout.', 'error');
+			nodes.payChapa.disabled = false;
+			nodes.payChapa.textContent = 'Pay with Chapa';
+		}
+	});
+
+	nodes.verifyPayment.addEventListener('click', async () => {
+		const bookingIdToVerify = Number(nodes.verifyPayment.dataset.bookingId || bookingId);
+		if (!bookingIdToVerify) {
+			return;
+		}
+		nodes.verifyPayment.disabled = true;
+		nodes.verifyPayment.textContent = 'Verifying...';
+		try {
+			await window.API.verifyChapaPayment({ booking_id: bookingIdToVerify });
+			window.UIUtils?.toast('Payment status updated');
+			const booking = await findBooking();
+			if (booking) renderBooking(booking);
+		} catch (error) {
+			window.UIUtils?.toast(error.message || 'Unable to verify payment.', 'error');
+		} finally {
+			nodes.verifyPayment.textContent = 'Refresh status';
+			nodes.verifyPayment.disabled = false;
+		}
+	});
 
 	nodes.copyReference.addEventListener('click', async () => {
 		const reference = nodes.reference.textContent.trim();

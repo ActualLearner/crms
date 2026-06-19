@@ -101,30 +101,38 @@
         return categoryLabel(status);
     }
 
-    // FIX 1: closed the function properly and moved `return ''` inside the function
+    function paymentStatusText(status) {
+        const normalized = String(status || 'unpaid').toLowerCase();
+        if (normalized === 'paid') return 'Paid';
+        if (normalized === 'pending') return 'Payment pending';
+        if (normalized === 'failed') return 'Payment failed';
+        return 'Unpaid';
+    }
+
+    // A pending booking is an unpaid hold awaiting checkout. Payment itself lives on
+    // the checkout page (booking-confirmed.html); the list only links back to it.
+    function isAwaitingPayment(booking) {
+        return booking.status === 'pending' && String(booking.payment_status || 'unpaid').toLowerCase() !== 'paid';
+    }
+
     function actionsFor(booking) {
-        const canCancel = ['pending', 'confirmed'].includes(booking.status);
-        const canExtend = booking.status === 'active';
-        const canReview = booking.status === 'completed';
-
-        if (canExtend) {
-            return `<a class="btn-quiet" href="./extend-booking.html?booking_id=${booking.id}">Extend</a>`;
-        }
-
-        if (canCancel) {
+        if (isAwaitingPayment(booking)) {
             return `
+                <a class="btn-secondary" href="./booking-confirmed.html?id=${booking.id}">Complete payment</a>
                 <button class="btn-quiet" type="button" data-cancel="${booking.id}">Cancel</button>
-                <a class="btn-secondary" href="./car-detail.html?id=${booking.car_id}&book=1">Modify</a>
             `;
         }
 
-        if (canReview) {
+        if (booking.status === 'active') {
+            return `<a class="btn-quiet" href="./extend-booking.html?booking_id=${booking.id}">Extend</a>`;
+        }
+
+        if (booking.status === 'completed') {
             return `<a class="btn-quiet" href="./review.html?booking_id=${booking.id}">Leave review</a>`;
         }
 
-        // FIX 4: was unreachable inside the canReview block; now reachable as default
         return '';
-    } // FIX 1: this closing brace was missing, causing actionsFor to swallow renderBookings
+    }
 
     function renderBookings() {
         const visible = state.bookings.filter(bookingMatchesFilter);
@@ -150,6 +158,9 @@
                                 <span class="duration-chip">${duration}d</span>
                             </div>
                             <div class="booking-reference">${escapeHtml(booking.reference_number)}</div>
+                            <div class="payment-line">
+                                <span class="payment-status ${escapeHtml(String(booking.payment_status || 'unpaid').toLowerCase())}">${paymentStatusText(booking.payment_status)}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="booking-side">

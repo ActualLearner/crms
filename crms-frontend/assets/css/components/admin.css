@@ -423,6 +423,33 @@
 	flex-wrap: wrap;
 }
 
+.payment-cell {
+	display: grid;
+	gap: var(--space-1);
+	align-content: center;
+}
+
+.payment-cell small {
+	max-width: 180px;
+	color: var(--text-muted);
+	font-size: 12px;
+	line-height: 1.3;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.status-pill.paid {
+	background: hsl(145 56% 92%);
+	color: hsl(145 44% 30%);
+}
+
+.status-pill.unpaid,
+.status-pill.failed {
+	background: hsl(0 72% 93%);
+	color: hsl(0 46% 40%);
+}
+
 .status-pill {
 	position: static;
 	inset: auto;

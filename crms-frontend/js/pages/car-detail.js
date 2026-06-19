@@ -400,7 +400,7 @@
 			if (!isLicenseVerified()) {
 				nodes.form.style.display = '';
 				setBookingFormEnabled(false);
-				setMessage('Your driver license is pending verification. Booking is unlocked after admin approval.', 'error');
+				setMessage('Your driver license is pending verification. Booking unlocks once your license is verified.', 'error');
 			} else {
 				setBookingFormEnabled(true);
 			}
