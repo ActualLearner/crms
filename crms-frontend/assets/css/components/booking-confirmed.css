@@ -99,6 +99,26 @@
 	flex-shrink: 0;
 }
 
+.notice-card [data-hold-timer] {
+	font-variant-numeric: tabular-nums;
+}
+
+.notice-card.notice-danger {
+	border-color: hsl(0 60% 80%);
+	background: hsl(0 72% 97%);
+	color: hsl(0 46% 38%);
+}
+
+.notice-card.notice-danger > span {
+	background: hsl(0 66% 52%);
+}
+
+.notice-card.notice-danger a {
+	color: inherit;
+	font-weight: 700;
+	text-decoration: underline;
+}
+
 .summary-card {
 	margin-bottom: var(--space-6);
 	overflow: hidden;
@@ -179,6 +199,64 @@
 	color: var(--text-secondary);
 	padding: var(--space-1) var(--space-3);
 	font-size: 13px;
+}
+
+
+.payment-summary-body {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+	gap: var(--space-4);
+	align-items: center;
+	padding: var(--space-6) var(--space-8);
+}
+
+.payment-summary-body span {
+	display: block;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	margin-bottom: var(--space-1);
+}
+
+.payment-summary-body strong {
+	color: var(--text-primary);
+	font-size: 18px;
+	overflow-wrap: anywhere;
+}
+
+.payment-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: var(--space-2);
+	flex-wrap: wrap;
+}
+
+.payment-actions .btn-secondary,
+.payment-actions .btn-quiet {
+	min-height: 44px;
+}
+
+.payment-status.paid {
+	background: hsl(145 56% 92%);
+	color: hsl(145 44% 30%);
+}
+
+.payment-status.pending {
+	background: hsl(50 92% 90%);
+	color: hsl(38 62% 34%);
+}
+
+.payment-status.failed {
+	background: hsl(0 72% 93%);
+	color: hsl(0 46% 40%);
+}
+
+.payment-status.unpaid {
+	background: hsl(0 0% 93%);
+	color: var(--text-secondary);
 }
 
 .details-grid {
@@ -301,6 +379,7 @@
 	.notice-card,
 	.summary-card-head,
 	.confirmed-vehicle,
+	.payment-summary-body,
 	.details-grid,
 	.price-lines,
 	.includes-confirmed ul {
@@ -309,6 +388,7 @@
 	}
 
 	.confirmed-vehicle,
+	.payment-summary-body,
 	.details-grid,
 	.includes-confirmed ul,
 	.confirmation-actions {

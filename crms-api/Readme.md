@@ -177,7 +177,18 @@ DB_PASS=
 
 RATE_LIMIT=5
 ANTHROPIC_API_KEY=your_key_here
+
+CHAPA_BASE_URL=https://api.chapa.co
+CHAPA_SECRET_KEY=your_chapa_secret_key_here
+CHAPA_WEBHOOK_SECRET=your_chapa_webhook_secret_here
+CHAPA_CURRENCY=USD
+API_PUBLIC_URL=http://localhost:8080/api
+FRONTEND_URL=http://localhost:8080
+CHAPA_CALLBACK_URL=
+CHAPA_RETURN_URL=
 ```
+
+Chapa supports ETB and USD; keep `CHAPA_CURRENCY` aligned with the currency used for stored car rates and frontend totals.
 
 ### Reading config in code
 
@@ -1201,6 +1212,17 @@ The frontend is just static files — it can be hosted anywhere for free.
 
 ---
 
+### Chapa Payment Flow
+
+1. A customer picks dates and creates a booking. It starts as `status=pending`, `payment_provider=chapa`, `payment_status=unpaid`, with `payment_tx_ref` set to the booking reference. The `pending` row reserves the dates via the overlap check in `BookingController::store()` — this is the hold.
+2. The customer lands on the checkout page, which calls `POST /payments/chapa/initialize` with `{ "booking_id": 123 }`. The API calls Chapa `POST /v1/transaction/initialize` via cURL and returns `checkout_url`.
+3. The frontend redirects the customer to Chapa checkout.
+4. Chapa sends the customer back to `return_url` and also calls the public callback/webhook endpoints. The API re-queries Chapa's verify endpoint before marking the booking `paid`. **There is no admin approval step** — when verification returns `paid`, the booking auto-transitions `pending → confirmed` and the car is marked `rented` (idempotent across callback, webhook, and return).
+5. Webhooks require `CHAPA_WEBHOOK_SECRET` and accept either `chapa-signature` or `x-chapa-signature` HMAC SHA256 validation before processing.
+6. If payment is not completed within `Booking::HOLD_MINUTES` (10 minutes), the unpaid hold is deleted on the next availability/booking check (`Booking::releaseExpiredHolds()`), freeing the dates. No cron is required.
+
+Set `API_PUBLIC_URL` to the externally reachable API origin so Chapa can reach `/payments/chapa/callback`. Set `FRONTEND_URL` to the customer frontend origin. Optional `CHAPA_CALLBACK_URL` and `CHAPA_RETURN_URL` override the generated URLs and support `{booking_id}`, `{tx_ref}`, and `{reference_number}` placeholders.
+
 ## 20. API Reference
 
 ### Authentication
@@ -1238,11 +1260,14 @@ GET /cars?page=2
 |---|---|---|---|
 | POST | `/bookings` | auth | Create booking |
 | GET | `/bookings/mine` | auth | My bookings |
-| DELETE | `/bookings/:id` | auth | Cancel booking |
+| DELETE | `/bookings/:id` | auth | Cancel an unpaid hold (deletes it and frees the dates) |
 | PUT | `/bookings/:id/extend` | auth | Extend booking |
 | POST | `/bookings/:id/review` | auth | Submit review |
+| POST | `/payments/chapa/initialize` | auth | Initialize Chapa hosted checkout for a booking and return `checkout_url` |
+| POST | `/payments/chapa/verify` | auth | Verify a Chapa payment for a booking or `tx_ref`; confirms the booking when paid |
+| GET | `/payments/chapa/callback` | public | Chapa checkout callback; verifies `tx_ref`/`trx_ref` before updating payment state |
+| POST | `/payments/chapa/webhook` | public | Chapa webhook; validates HMAC signature and re-verifies transaction |
 | GET | `/bookings` | admin | All bookings |
-| PUT | `/bookings/:id/confirm` | admin | Confirm booking |
 | PUT | `/bookings/:id/return` | admin | Log return + penalties |
 
 ### Favourites & Waitlist

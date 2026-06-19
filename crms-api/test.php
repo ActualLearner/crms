@@ -231,6 +231,8 @@ require_once ROOT . '/models/Car.php';
 require_once ROOT . '/models/Booking.php';
 require_once ROOT . '/models/Review.php';
 require_once ROOT . '/models/Promo.php';
+require_once ROOT . '/services/ChapaClient.php';
+require_once ROOT . '/services/PaymentService.php';
 
 test('Model::create() and find()', function() {
     $user = User::create([
@@ -361,6 +363,154 @@ test('Promo discount calculation', function() {
     $finalTotal  = round($baseTotal - $discountAmt, 2);
     assert_equals(50.00, $discountAmt);
     assert_equals(150.00, $finalTotal);
+});
+
+test('Payment metadata columns exist on bookings', function() {
+    $columns = array_column(DB::table('INFORMATION_SCHEMA.COLUMNS')
+        ->select(['COLUMN_NAME'])
+        ->where('TABLE_SCHEMA', env('DB_NAME', 'crms'))
+        ->where('TABLE_NAME', 'bookings')
+        ->get(), 'COLUMN_NAME');
+
+    foreach (['payment_provider', 'payment_status', 'payment_tx_ref', 'payment_ref_id', 'payment_amount', 'payment_last_checked', 'payment_meta'] as $column) {
+        assert_true(in_array($column, $columns, true), "Missing {$column} column");
+    }
+});
+
+test('Chapa webhook signature validation formula matches docs', function() {
+    $secret = 'test-webhook-secret';
+    $body = json_encode(['tx_ref' => 'CRMS-TEST-0002', 'status' => 'success']);
+    $payloadHash = hash_hmac('sha256', $body, $secret);
+    $secretHash = hash_hmac('sha256', $secret, $secret);
+
+    assert_equals($payloadHash, hash_hmac('sha256', $body, $secret));
+    assert_equals($secretHash, hash_hmac('sha256', $secret, $secret));
+});
+
+
+test('Chapa webhook accepts x-chapa-signature payload HMAC', function() {
+    $_ENV['CHAPA_WEBHOOK_SECRET'] = 'test-webhook-secret';
+    $body = json_encode(['tx_ref' => 'CRMS-TEST-0002', 'status' => 'success']);
+    $_SERVER['HTTP_X_CHAPA_SIGNATURE'] = hash_hmac('sha256', $body, $_ENV['CHAPA_WEBHOOK_SECRET']);
+    unset($_SERVER['HTTP_CHAPA_SIGNATURE']);
+
+    require_once ROOT . '/controllers/PaymentController.php';
+    $controller = new PaymentController();
+    $method = new ReflectionMethod($controller, 'hasValidSignature');
+    $method->setAccessible(true);
+
+    assert_true($method->invoke($controller, $body, json_decode($body, true)));
+
+    unset($_ENV['CHAPA_WEBHOOK_SECRET'], $_SERVER['HTTP_X_CHAPA_SIGNATURE']);
+});
+
+test('Chapa initialize route is documented in routes config', function() {
+    $routes = file_get_contents(ROOT . '/config/routes.php');
+    assert_true(str_contains($routes, "Router::post('/payments/chapa/initialize'"));
+    assert_true(str_contains($routes, "PaymentController@initialize"));
+});
+
+test('Admin booking confirm route is removed', function() {
+    $routes = file_get_contents(ROOT . '/config/routes.php');
+    assert_true(!str_contains($routes, "/bookings/:id/confirm"), 'confirm route should be gone');
+    assert_true(str_contains($routes, "Router::post('/payments/chapa/verify'"), 'verify route should exist');
+    assert_true(!str_contains($routes, "/payments/chapa/test-verify"), 'test-verify route should be renamed');
+});
+
+test('Successful Chapa verification confirms the booking and rents the car', function() {
+    $carId = (int) DB::table('cars')->insert([
+        'brand' => 'Pay', 'model' => 'Confirm', 'year' => 2023,
+        'category' => 'SUV', 'seats' => 5, 'transmission' => 'auto',
+        'daily_rate' => 100, 'penalty_rate' => 20, 'status' => 'available',
+    ]);
+    $userId = (int) DB::table('users')->insert([
+        'name' => 'Pay Confirm', 'email' => 'payconfirm@crms.com',
+        'password' => 'hashed', 'phone' => '0911111111', 'license_number' => 'PAY001',
+        'role' => 'customer',
+    ]);
+    $ref = 'CRMS-TEST-PAY1';
+    $bookingId = (int) DB::table('bookings')->insert([
+        'user_id' => $userId, 'car_id' => $carId, 'reference_number' => $ref,
+        'start_date' => '2030-01-01', 'end_date' => '2030-01-03', 'expected_return_date' => '2030-01-03',
+        'status' => 'pending', 'base_total' => 200, 'final_total' => 200,
+        'payment_provider' => 'chapa', 'payment_status' => 'pending', 'payment_tx_ref' => $ref,
+        'payment_amount' => 200,
+    ]);
+
+    // Fake Chapa client returning a successful verification for this tx_ref.
+    $fake = new class($ref) extends ChapaClient {
+        public function __construct(private string $ref) {}
+        public function verify(string $txRef): array {
+            return ['_http_status' => 200, 'status' => 'success', 'data' => [
+                'status' => 'success', 'tx_ref' => $this->ref, 'amount' => 200, 'currency' => 'USD', 'ref_id' => 'chapa-123',
+            ]];
+        }
+    };
+
+    $result = (new PaymentService($fake))->verifyBookingPayment($bookingId, $ref, 'test');
+    assert_equals('paid', $result['payment_status']);
+
+    $booking = Booking::find($bookingId);
+    assert_equals('confirmed', $booking['status'], 'paid booking should auto-confirm');
+    $car = DB::table('cars')->where('id', $carId)->first();
+    assert_equals('rented', $car['status'], 'car should be rented once paid');
+
+    DB::table('bookings')->where('id', $bookingId)->delete();
+    DB::table('cars')->where('id', $carId)->delete();
+    DB::table('users')->where('id', $userId)->delete();
+});
+
+test('releaseExpiredHolds deletes stale unpaid holds and frees dates', function() {
+    $carId = (int) DB::table('cars')->insert([
+        'brand' => 'Hold', 'model' => 'Expiry', 'year' => 2023,
+        'category' => 'SUV', 'seats' => 5, 'transmission' => 'auto',
+        'daily_rate' => 100, 'penalty_rate' => 20, 'status' => 'available',
+    ]);
+    $userId = (int) DB::table('users')->insert([
+        'name' => 'Hold User', 'email' => 'holduser@crms.com',
+        'password' => 'hashed', 'phone' => '0911111112', 'license_number' => 'HLD001',
+        'role' => 'customer',
+    ]);
+
+    // A stale unpaid hold (created 20 min ago) and a fresh one (now).
+    $staleId = (int) DB::table('bookings')->insert([
+        'user_id' => $userId, 'car_id' => $carId, 'reference_number' => 'CRMS-TEST-STALE',
+        'start_date' => '2031-01-01', 'end_date' => '2031-01-03', 'expected_return_date' => '2031-01-03',
+        'status' => 'pending', 'base_total' => 200, 'final_total' => 200,
+        'payment_status' => 'unpaid', 'payment_tx_ref' => 'CRMS-TEST-STALE',
+        'created_at' => date('Y-m-d H:i:s', time() - 20 * 60),
+    ]);
+    $freshId = (int) DB::table('bookings')->insert([
+        'user_id' => $userId, 'car_id' => $carId, 'reference_number' => 'CRMS-TEST-FRESH',
+        'start_date' => '2031-02-01', 'end_date' => '2031-02-03', 'expected_return_date' => '2031-02-03',
+        'status' => 'pending', 'base_total' => 200, 'final_total' => 200,
+        'payment_status' => 'unpaid', 'payment_tx_ref' => 'CRMS-TEST-FRESH',
+        'created_at' => date('Y-m-d H:i:s'),
+    ]);
+    // A stale but PAID booking must never be deleted.
+    $paidId = (int) DB::table('bookings')->insert([
+        'user_id' => $userId, 'car_id' => $carId, 'reference_number' => 'CRMS-TEST-PAID',
+        'start_date' => '2031-03-01', 'end_date' => '2031-03-03', 'expected_return_date' => '2031-03-03',
+        'status' => 'confirmed', 'base_total' => 200, 'final_total' => 200,
+        'payment_status' => 'paid', 'payment_tx_ref' => 'CRMS-TEST-PAID',
+        'created_at' => date('Y-m-d H:i:s', time() - 20 * 60),
+    ]);
+
+    Booking::releaseExpiredHolds();
+
+    assert_equals(null, Booking::find($staleId), 'stale unpaid hold should be deleted');
+    assert_not_null(Booking::find($freshId), 'fresh hold should survive');
+    assert_not_null(Booking::find($paidId), 'paid booking should survive');
+
+    DB::table('bookings')->whereIn('id', [$freshId, $paidId])->delete();
+    DB::table('cars')->where('id', $carId)->delete();
+    DB::table('users')->where('id', $userId)->delete();
+});
+
+test('Frontend exposes Chapa checkout initialization helper', function() {
+    $api = file_get_contents(dirname(ROOT) . '/crms-frontend/assets/js/api.js');
+    assert_true(str_contains($api, 'initializeChapaPayment'));
+    assert_true(str_contains($api, '/payments/chapa/initialize'));
 });
 
 // ── 5. Transactions ───────────────────────────────────────────────────────

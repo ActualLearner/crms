@@ -101,6 +101,8 @@ class CarController extends Controller
     // GET /cars/:id/availability
     public function availability(string $id): void
     {
+        Booking::releaseExpiredHolds();
+
         $booked = DB::table('bookings')
             ->select(['start_date', 'end_date', 'status'])
             ->where('car_id', (int) $id)

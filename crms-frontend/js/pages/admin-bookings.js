@@ -57,10 +57,13 @@
 		});
 	}
 
+	function paymentStatus(booking) {
+		const status = String(booking.payment_status || 'unpaid').toLowerCase();
+		return UI.status(status === 'paid' ? 'paid' : status === 'failed' ? 'failed' : status === 'pending' ? 'pending' : 'unpaid');
+	}
+
 	function actions(booking) {
-		if (booking.status === 'pending') {
-			return `<button class="admin-btn primary" data-confirm="${booking.id}">Confirm</button>`;
-		}
+		// Bookings confirm themselves once payment succeeds, so admins only log returns.
 		if (['active', 'confirmed'].includes(booking.status)) {
 			return `<button class="admin-btn" data-return="${booking.id}">Log return</button>`;
 		}
@@ -78,9 +81,10 @@
 				<td>${UI.date(booking.end_date)}</td>
 				<td><strong>${UI.money(booking.final_total)}</strong></td>
 				<td>${UI.status(normalizeStatus(booking.status))}</td>
+				<td><div class="payment-cell">${paymentStatus(booking)}<small>${UI.escape(booking.payment_tx_ref || booking.reference_number || '')}</small></div></td>
 				<td><div class="admin-row-actions">${actions(booking)}</div></td>
 			</tr>
-		`).join('') : `<tr><td colspan="8">${UI.empty('No bookings match those filters.')}</td></tr>`;
+		`).join('') : `<tr><td colspan="9">${UI.empty('No bookings match those filters.')}</td></tr>`;
 	}
 
 	async function load() {
@@ -91,7 +95,7 @@
 			render();
 		} catch (error) {
 			console.error(error);
-			body.innerHTML = `<tr><td colspan="8">${UI.empty(`Unable to load bookings: ${UI.escape(error.message)}`)}</td></tr>`;
+			body.innerHTML = `<tr><td colspan="9">${UI.empty(`Unable to load bookings: ${UI.escape(error.message)}`)}</td></tr>`;
 		}
 	}
 
@@ -227,18 +231,8 @@
 		}
 	});
 
-	body?.addEventListener('click', async event => {
-		const confirm = event.target.closest('[data-confirm]');
+	body?.addEventListener('click', event => {
 		const ret = event.target.closest('[data-return]');
-		if (confirm) {
-			try {
-				await window.API.confirmBooking(confirm.dataset.confirm);
-				UI.toast('Booking confirmed');
-				await load();
-			} catch (error) {
-				UI.toast(error.message);
-			}
-		}
 		if (ret) openReturn(ret.dataset.return);
 	});
 

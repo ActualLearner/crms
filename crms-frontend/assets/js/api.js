@@ -177,6 +177,18 @@
 				body: JSON.stringify({ new_end_date: newEndDate }),
 			});
 		},
+		initializeChapaPayment(bookingId) {
+			return request('/payments/chapa/initialize', {
+				method: 'POST',
+				body: JSON.stringify({ booking_id: Number(bookingId) }),
+			});
+		},
+		verifyChapaPayment(data) {
+			return request('/payments/chapa/verify', {
+				method: 'POST',
+				body: JSON.stringify(data),
+			});
+		},
 		validatePromo(code) {
 			return request('/promos/validate', {
 				method: 'POST',
@@ -245,9 +257,6 @@
 				if (value !== undefined && value !== null && value !== '') query.set(key, value);
 			});
                         return request(`/bookings${query.toString() ? `?${query}` : ''}`, { method: 'GET' });
-                },
-                confirmBooking(id) {
-                        return request(`/bookings/${id}/confirm`, { method: 'PUT' });
                 },
                 returnBooking(id, data) {
                         return request(`/bookings/${id}/return`, {

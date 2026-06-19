@@ -258,6 +258,45 @@
 	margin-top: var(--space-4);
 }
 
+.payment-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	margin-top: var(--space-2);
+	color: var(--text-muted);
+	font-size: 13px;
+}
+
+.payment-status {
+	display: inline-flex;
+	align-items: center;
+	min-height: 26px;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-2);
+	font-weight: 700;
+}
+
+.payment-status.paid {
+	background: hsl(145 56% 92%);
+	color: hsl(145 44% 30%);
+}
+
+.payment-status.pending {
+	background: hsl(50 92% 90%);
+	color: hsl(38 62% 34%);
+}
+
+.payment-status.failed {
+	background: hsl(0 72% 93%);
+	color: hsl(0 46% 40%);
+}
+
+.payment-status.unpaid {
+	background: hsl(0 0% 93%);
+	color: var(--text-secondary);
+}
+
 .extend-inline {
 	display: flex;
 	gap: var(--space-2);
