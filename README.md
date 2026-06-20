@@ -131,8 +131,6 @@ CHAPA_WEBHOOK_SECRET=your_chapa_webhook_secret_here
 CHAPA_CURRENCY=USD
 API_PUBLIC_URL=http://localhost:8080/api
 FRONTEND_URL=http://localhost:8080
-CHAPA_CALLBACK_URL=
-CHAPA_RETURN_URL=
 ```
 
 Chapa supports ETB and USD; keep `CHAPA_CURRENCY` aligned with the currency used for stored car rates and frontend totals.
@@ -166,7 +164,7 @@ Chapa supports ETB and USD; keep `CHAPA_CURRENCY` aligned with the currency used
 - They are taken straight to a checkout page and pay with Chapa hosted checkout (`data.checkout_url`).
 - Chapa callbacks and webhooks are always verified with Chapa's transaction verify endpoint before marking a booking paid; a successful payment automatically confirms the booking and reserves the car — there is no admin approval step.
 - Unpaid holds that aren't paid within 10 minutes are released automatically, freeing the dates.
-- Configure `API_PUBLIC_URL` for the public API base used by Chapa callbacks and `FRONTEND_URL` for the return page. Optional `CHAPA_CALLBACK_URL` and `CHAPA_RETURN_URL` templates support `{booking_id}`, `{tx_ref}`, and `{reference_number}`.
+- Configure `API_PUBLIC_URL` for the public API base used by Chapa callbacks and `FRONTEND_URL` for the return page.
 
 ### Technical
 

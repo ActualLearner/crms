@@ -104,7 +104,7 @@ class PaymentController extends Controller
             $this->error('Invalid webhook payload', 400);
         }
 
-        if (!$this->hasValidSignature($rawBody, $data)) {
+        if (!$this->hasValidSignature($rawBody)) {
             $this->error('Invalid Chapa webhook signature', 401);
         }
 
@@ -153,35 +153,29 @@ class PaymentController extends Controller
         ];
     }
 
-    private function hasValidSignature(string $rawBody, array $data): bool
+    // Per Chapa's docs, a webhook carries two signature headers and either one
+    // matching is enough to trust it:
+    //   x-chapa-signature = HMAC-SHA256 of the raw request body, keyed by the secret
+    //   chapa-signature   = HMAC-SHA256 of the secret itself, keyed by the secret
+    private function hasValidSignature(string $rawBody): bool
     {
         $secret = trim((string) env('CHAPA_WEBHOOK_SECRET', ''));
         if ($secret === '' || $secret === 'your_chapa_webhook_secret_here') {
             return false;
         }
 
-        $headers = array_filter([
-            trim((string) ($_SERVER['HTTP_CHAPA_SIGNATURE'] ?? '')),
+        $expected = [
+            hash_hmac('sha256', $rawBody, $secret),
+            hash_hmac('sha256', $secret, $secret),
+        ];
+        $received = [
             trim((string) ($_SERVER['HTTP_X_CHAPA_SIGNATURE'] ?? '')),
-        ]);
-        if (!$headers) {
-            return false;
-        }
+            trim((string) ($_SERVER['HTTP_CHAPA_SIGNATURE'] ?? '')),
+        ];
 
-        $expectedHashes = [hash_hmac('sha256', $secret, $secret)];
-        $signablePayloads = [$rawBody];
-        $encoded = json_encode($data);
-        if (is_string($encoded) && $encoded !== $rawBody) {
-            $signablePayloads[] = $encoded;
-        }
-
-        foreach (array_unique($signablePayloads) as $payload) {
-            $expectedHashes[] = hash_hmac('sha256', $payload, $secret);
-        }
-
-        foreach (array_unique($headers) as $header) {
-            foreach (array_unique($expectedHashes) as $expectedHash) {
-                if (hash_equals($expectedHash, $header)) {
+        foreach ($received as $signature) {
+            foreach ($expected as $hash) {
+                if ($signature !== '' && hash_equals($hash, $signature)) {
                     return true;
                 }
             }

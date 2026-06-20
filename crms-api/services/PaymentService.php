@@ -67,11 +67,12 @@ class PaymentService
             'first_name'   => $firstName,
             'last_name'    => $lastName,
             'tx_ref'       => $txRef,
-            'callback_url' => $this->callbackUrl($booking),
+            'callback_url' => $this->callbackUrl(),
             'return_url'   => $this->returnUrl($booking),
             'customization' => [
-                'title'       => 'Auto Ultimate car rental',
-                'description' => 'Payment for booking ' . $booking['reference_number'],
+                // Chapa caps the title at 16 characters and the description at 50.
+                'title'       => 'Auto Ultimate',
+                'description' => mb_substr('Booking ' . $booking['reference_number'], 0, 50),
             ],
             'meta' => [
                 'booking_id'     => (string) $booking['id'],
@@ -91,7 +92,8 @@ class PaymentService
 
         $response = $this->client->initialize($payload);
         if (($response['_http_status'] ?? 500) >= 400 || empty($response['data']['checkout_url'])) {
-            $message = (string) ($response['message'] ?? 'Chapa checkout initialization failed');
+            // Chapa returns validation errors as a field => [messages] map, not a string.
+            $message = $this->flattenChapaMessage($response['message'] ?? null) ?: 'Chapa checkout initialization failed';
             throw new RuntimeException($message, 502);
         }
 
@@ -227,6 +229,23 @@ class PaymentService
         ];
     }
 
+    private function flattenChapaMessage(mixed $message): string
+    {
+        if (is_string($message)) {
+            return $message;
+        }
+        if (is_array($message)) {
+            $parts = [];
+            array_walk_recursive($message, function ($value) use (&$parts) {
+                if (is_scalar($value)) {
+                    $parts[] = (string) $value;
+                }
+            });
+            return implode(' ', $parts);
+        }
+        return '';
+    }
+
     private function existingCheckoutUrl(array $booking): ?string
     {
         $meta = $this->existingPaymentMeta($booking);
@@ -287,60 +306,18 @@ class PaymentService
         return preg_match('/^0[79]\d{8}$/', $digits) ? $digits : null;
     }
 
-    private function callbackUrl(array $booking): string
+    // Chapa calls this server-to-server after checkout, so it must be publicly reachable.
+    private function callbackUrl(): string
     {
-        $template = trim((string) env('CHAPA_CALLBACK_URL', ''));
-        if ($template !== '') {
-            return $this->formatUrl($template, $booking);
-        }
-
-        return rtrim($this->apiPublicUrl(), '/') . '/payments/chapa/callback';
+        $base = rtrim((string) env('API_PUBLIC_URL', 'http://localhost:8080/api'), '/');
+        return $base . '/payments/chapa/callback';
     }
 
+    // Where Chapa sends the customer's browser back. A single query param keeps the
+    // URL safe from being mangled in transit; the page confirms payment on load.
     private function returnUrl(array $booking): string
     {
-        $template = trim((string) env('CHAPA_RETURN_URL', ''));
-        if ($template !== '') {
-            return $this->formatUrl($template, $booking);
-        }
-
-        return rtrim($this->frontendUrl(), '/') . '/pages/customer/booking-confirmed.html?id=' . (int) $booking['id'] . '&payment=returned';
-    }
-
-    private function formatUrl(string $template, array $booking): string
-    {
-        return str_replace(
-            ['{booking_id}', '{tx_ref}', '{reference_number}'],
-            [(string) $booking['id'], (string) ($booking['payment_tx_ref'] ?: $booking['reference_number']), (string) $booking['reference_number']],
-            $template
-        );
-    }
-
-    private function apiPublicUrl(): string
-    {
-        $configured = trim((string) env('API_PUBLIC_URL', ''));
-        if ($configured !== '') {
-            return $configured;
-        }
-
-        $scheme = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
-        return rtrim($scheme . '://' . $host . ($scriptDir === '/' ? '' : $scriptDir), '/');
-    }
-
-    private function frontendUrl(): string
-    {
-        $configured = trim((string) env('FRONTEND_URL', ''));
-        if ($configured !== '') {
-            return $configured;
-        }
-
-        $allowed = trim(explode(',', (string) env('ALLOWED_ORIGIN', ''))[0] ?? '');
-        if ($allowed !== '') {
-            return $allowed;
-        }
-
-        return 'http://localhost:8080';
+        $base = rtrim((string) env('FRONTEND_URL', 'http://localhost:8080'), '/');
+        return $base . '/pages/customer/booking-confirmed.html?id=' . (int) $booking['id'];
     }
 }
