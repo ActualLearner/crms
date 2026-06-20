@@ -10,7 +10,6 @@
 	const nodes = {
 		reference: document.querySelector('[data-reference]'),
 		copyReference: document.querySelector('[data-copy-reference]'),
-		userEmail: document.querySelector('[data-user-email]'),
 		status: document.querySelector('[data-status]'),
 		heroTitle: document.querySelector('[data-hero-title]'),
 		heroCopy: document.querySelector('[data-hero-copy]'),
@@ -127,7 +126,7 @@
 
 		if (paid) {
 			nodes.heroTitle.textContent = 'Booking confirmed!';
-			nodes.heroCopy.textContent = 'Payment received — your car is reserved. A confirmation is on its way to your email.';
+			nodes.heroCopy.textContent = 'Payment received — your car is reserved. View it anytime under My bookings.';
 			stopCountdown();
 		} else if (expired) {
 			nodes.heroTitle.textContent = 'Reservation expired';
@@ -231,7 +230,6 @@
 		try {
 			const me = await window.API.me();
 			window.AppState?.setUser(me.data);
-			nodes.userEmail.textContent = me.data?.email || 'your email';
 
 			const booking = await findBooking();
 			if (!booking) {
