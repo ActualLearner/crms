@@ -184,11 +184,9 @@ CHAPA_WEBHOOK_SECRET=your_chapa_webhook_secret_here
 CHAPA_CURRENCY=USD
 API_PUBLIC_URL=http://localhost:8080/api
 FRONTEND_URL=http://localhost:8080
-CHAPA_CALLBACK_URL=
-CHAPA_RETURN_URL=
 ```
 
-Chapa supports ETB and USD; keep `CHAPA_CURRENCY` aligned with the currency used for stored car rates and frontend totals.
+Chapa supports ETB and USD; keep `CHAPA_CURRENCY` aligned with the currency used for stored car rates and frontend totals. `API_PUBLIC_URL` is the publicly reachable API origin Chapa uses for the callback; `FRONTEND_URL` is where the customer is returned after checkout.
 
 ### Reading config in code
 
@@ -1221,7 +1219,7 @@ The frontend is just static files — it can be hosted anywhere for free.
 5. Webhooks require `CHAPA_WEBHOOK_SECRET` and accept either `chapa-signature` or `x-chapa-signature` HMAC SHA256 validation before processing.
 6. If payment is not completed within `Booking::HOLD_MINUTES` (10 minutes), the unpaid hold is deleted on the next availability/booking check (`Booking::releaseExpiredHolds()`), freeing the dates. No cron is required.
 
-Set `API_PUBLIC_URL` to the externally reachable API origin so Chapa can reach `/payments/chapa/callback`. Set `FRONTEND_URL` to the customer frontend origin. Optional `CHAPA_CALLBACK_URL` and `CHAPA_RETURN_URL` override the generated URLs and support `{booking_id}`, `{tx_ref}`, and `{reference_number}` placeholders.
+Set `API_PUBLIC_URL` to the externally reachable API origin so Chapa can reach `/payments/chapa/callback`, and `FRONTEND_URL` to the customer frontend origin so Chapa returns the customer to the booking page after checkout.
 
 ## 20. API Reference
 

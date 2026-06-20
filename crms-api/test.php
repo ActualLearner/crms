@@ -399,7 +399,37 @@ test('Chapa webhook accepts x-chapa-signature payload HMAC', function() {
     $method = new ReflectionMethod($controller, 'hasValidSignature');
     $method->setAccessible(true);
 
-    assert_true($method->invoke($controller, $body, json_decode($body, true)));
+    assert_true($method->invoke($controller, $body));
+
+    unset($_ENV['CHAPA_WEBHOOK_SECRET'], $_SERVER['HTTP_X_CHAPA_SIGNATURE']);
+});
+
+test('Chapa webhook accepts chapa-signature secret HMAC', function() {
+    $_ENV['CHAPA_WEBHOOK_SECRET'] = 'test-webhook-secret';
+    $body = json_encode(['tx_ref' => 'CRMS-TEST-0003', 'status' => 'success']);
+    $_SERVER['HTTP_CHAPA_SIGNATURE'] = hash_hmac('sha256', $_ENV['CHAPA_WEBHOOK_SECRET'], $_ENV['CHAPA_WEBHOOK_SECRET']);
+    unset($_SERVER['HTTP_X_CHAPA_SIGNATURE']);
+
+    require_once ROOT . '/controllers/PaymentController.php';
+    $method = new ReflectionMethod(PaymentController::class, 'hasValidSignature');
+    $method->setAccessible(true);
+
+    assert_true($method->invoke(new PaymentController(), $body));
+
+    unset($_ENV['CHAPA_WEBHOOK_SECRET'], $_SERVER['HTTP_CHAPA_SIGNATURE']);
+});
+
+test('Chapa webhook rejects a bad signature', function() {
+    $_ENV['CHAPA_WEBHOOK_SECRET'] = 'test-webhook-secret';
+    $body = json_encode(['tx_ref' => 'CRMS-TEST-0004', 'status' => 'success']);
+    $_SERVER['HTTP_X_CHAPA_SIGNATURE'] = 'deadbeef';
+    unset($_SERVER['HTTP_CHAPA_SIGNATURE']);
+
+    require_once ROOT . '/controllers/PaymentController.php';
+    $method = new ReflectionMethod(PaymentController::class, 'hasValidSignature');
+    $method->setAccessible(true);
+
+    assert_true(!$method->invoke(new PaymentController(), $body), 'forged signature must be rejected');
 
     unset($_ENV['CHAPA_WEBHOOK_SECRET'], $_SERVER['HTTP_X_CHAPA_SIGNATURE']);
 });
@@ -418,6 +448,14 @@ test('Admin booking confirm route is removed', function() {
 });
 
 test('Successful Chapa verification confirms the booking and rents the car', function() {
+    // Self-clean any fixtures left by an interrupted prior run (unique email/tx_ref).
+    $stale = DB::table('users')->where('email', 'payconfirm@crms.com')->first();
+    if ($stale) {
+        DB::table('bookings')->where('user_id', (int) $stale['id'])->delete();
+        DB::table('users')->where('id', (int) $stale['id'])->delete();
+    }
+    DB::table('cars')->where('brand', 'Pay')->where('model', 'Confirm')->delete();
+
     $carId = (int) DB::table('cars')->insert([
         'brand' => 'Pay', 'model' => 'Confirm', 'year' => 2023,
         'category' => 'SUV', 'seats' => 5, 'transmission' => 'auto',
@@ -438,11 +476,12 @@ test('Successful Chapa verification confirms the booking and rents the car', fun
     ]);
 
     // Fake Chapa client returning a successful verification for this tx_ref.
-    $fake = new class($ref) extends ChapaClient {
-        public function __construct(private string $ref) {}
+    // Currency must match CHAPA_CURRENCY — the service cross-checks it.
+    $fake = new class($ref, strtoupper((string) env('CHAPA_CURRENCY', 'USD'))) extends ChapaClient {
+        public function __construct(private string $ref, private string $currency) {}
         public function verify(string $txRef): array {
             return ['_http_status' => 200, 'status' => 'success', 'data' => [
-                'status' => 'success', 'tx_ref' => $this->ref, 'amount' => 200, 'currency' => 'USD', 'ref_id' => 'chapa-123',
+                'status' => 'success', 'tx_ref' => $this->ref, 'amount' => 200, 'currency' => $this->currency, 'ref_id' => 'chapa-123',
             ]];
         }
     };
@@ -461,6 +500,14 @@ test('Successful Chapa verification confirms the booking and rents the car', fun
 });
 
 test('releaseExpiredHolds deletes stale unpaid holds and frees dates', function() {
+    // Self-clean any fixtures left by an interrupted prior run (unique email/tx_ref).
+    $stale = DB::table('users')->where('email', 'holduser@crms.com')->first();
+    if ($stale) {
+        DB::table('bookings')->where('user_id', (int) $stale['id'])->delete();
+        DB::table('users')->where('id', (int) $stale['id'])->delete();
+    }
+    DB::table('cars')->where('brand', 'Hold')->where('model', 'Expiry')->delete();
+
     $carId = (int) DB::table('cars')->insert([
         'brand' => 'Hold', 'model' => 'Expiry', 'year' => 2023,
         'category' => 'SUV', 'seats' => 5, 'transmission' => 'auto',

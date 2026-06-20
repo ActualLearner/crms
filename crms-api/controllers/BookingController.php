@@ -168,6 +168,17 @@ class BookingController extends Controller
             ->orderBy('bookings.created_at', 'DESC')
             ->paginate(10, $page);
 
+        // Tell the client how long an unpaid hold has left, computed from the server
+        // clock — the checkout countdown must not depend on the browser's clock.
+        $holdSeconds = Booking::HOLD_MINUTES * 60;
+        foreach ($bookings['data'] as &$row) {
+            $isHold = $row['status'] === 'pending' && ($row['payment_status'] ?? '') !== 'paid';
+            $row['hold_seconds_remaining'] = $isHold
+                ? max(0, $holdSeconds - (time() - strtotime($row['created_at'] . ' UTC')))
+                : null;
+        }
+        unset($row);
+
         $this->success($bookings);
     }
 

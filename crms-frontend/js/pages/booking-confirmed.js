@@ -83,17 +83,16 @@
 		return 'Unpaid';
 	}
 
-	// When the 10-minute hold ends (computed from created_at, which the API returns in UTC).
-	function holdDeadline(booking) {
-		const raw = String(booking.created_at || '');
-		if (!raw) return null;
-		const created = new Date(`${raw.replace(' ', 'T')}Z`);
-		return Number.isNaN(created.getTime()) ? null : created.getTime() + HOLD_MINUTES * 60000;
+	// Seconds left on the hold, as computed by the server (clock-skew safe — the
+	// browser clock is never compared against the server's created_at timestamp).
+	function holdSecondsRemaining(booking) {
+		const raw = booking.hold_seconds_remaining;
+		return raw === null || raw === undefined ? null : Math.max(0, Number(raw) || 0);
 	}
 
 	function isHoldExpired(booking) {
-		const deadline = holdDeadline(booking);
-		return deadline !== null && Date.now() >= deadline;
+		const remaining = holdSecondsRemaining(booking);
+		return remaining !== null && remaining <= 0;
 	}
 
 	function stopCountdown() {
@@ -142,21 +141,25 @@
 	}
 
 	function startCountdown(booking) {
-		const deadline = holdDeadline(booking);
 		stopCountdown();
-		if (deadline === null) {
+		const remaining = holdSecondsRemaining(booking);
+		if (remaining === null) {
 			nodes.holdTimer.textContent = `${HOLD_MINUTES}:00`;
 			return;
 		}
 
+		// Anchor the deadline to the server-provided remaining, then tick off local
+		// elapsed time only — any client/server clock difference cancels out.
+		const target = Date.now() + remaining * 1000;
 		const tick = () => {
-			const remaining = Math.max(0, deadline - Date.now());
-			const minutes = Math.floor(remaining / 60000);
-			const seconds = Math.floor((remaining % 60000) / 1000);
+			const ms = Math.max(0, target - Date.now());
+			const minutes = Math.floor(ms / 60000);
+			const seconds = Math.floor((ms % 60000) / 1000);
 			nodes.holdTimer.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
-			if (remaining <= 0) {
+			if (ms <= 0) {
 				stopCountdown();
 				// Hold lapsed while the page was open — flip to the expired state.
+				booking.hold_seconds_remaining = 0;
 				renderPayment(booking);
 			}
 		};
@@ -239,14 +242,10 @@
 
 			renderBooking(booking);
 
-			if (params.get('payment') === 'returned' && booking.id && String(booking.payment_status || '').toLowerCase() !== 'paid') {
-				try {
-					await window.API.verifyChapaPayment({ booking_id: Number(booking.id) });
-					const refreshed = await findBooking();
-					if (refreshed) renderBooking(refreshed);
-				} catch (error) {
-					window.UIUtils?.toast(error.message || 'Unable to refresh payment status.', 'error');
-				}
+			// A 'pending' payment means checkout was started — the customer is most
+			// likely back from Chapa, so confirm the outcome with the server.
+			if (String(booking.payment_status || '').toLowerCase() === 'pending') {
+				await confirmPayment(booking.id);
 			}
 		} catch (error) {
 			if (error.message?.includes('Unauthenticated')) {
@@ -255,6 +254,22 @@
 			}
 			nodes.reference.textContent = 'Unavailable';
 			nodes.carName.textContent = error.message || 'Unable to load booking.';
+		}
+	}
+
+	// Ask the server to verify the Chapa transaction, then re-render with the result.
+	async function confirmPayment(id) {
+		nodes.heroCopy.textContent = 'Confirming your payment…';
+		try {
+			await window.API.verifyChapaPayment({ booking_id: Number(id) });
+		} catch (error) {
+			window.UIUtils?.toast(error.message || 'Unable to confirm payment.', 'error');
+		}
+		const refreshed = await findBooking();
+		if (refreshed) {
+			renderBooking(refreshed);
+		} else {
+			renderExpiredHold();
 		}
 	}
 

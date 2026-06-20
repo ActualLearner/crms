@@ -37,3 +37,8 @@ input,
 label {
 	font: inherit;
 }
+
+/* The hidden attribute must always win, even over components that set display. */
+[hidden] {
+	display: none !important;
+}
