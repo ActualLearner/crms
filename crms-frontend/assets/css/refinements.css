@@ -1,0 +1,667 @@
+/*
+ * Shared UI refinement pass.
+ * Keep this file simple: it only tightens scale, spacing, and layout density.
+ */
+
+:root {
+	--radius-sm: 6px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 16px;
+	--page-max: 1280px;
+	--page-pad: clamp(16px, 2.4vw, 32px);
+	--bg: var(--bg-page);
+	--text: var(--text-primary);
+	--border: var(--border-subtle);
+	--border-normal: var(--border-subtle);
+	--surface-base: var(--surface);
+	--surface-muted: hsl(220 8% 92%);
+	--brand-primary: var(--brand-dark);
+	--success: hsl(145 44% 30%);
+	--warning: hsl(38 62% 34%);
+	--danger: hsl(0 46% 40%);
+}
+
+body {
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+	outline: 2px solid hsl(220 8% 22%);
+	outline-offset: 2px;
+}
+
+.app-shell {
+	grid-template-columns: 168px minmax(0, 1fr);
+	grid-template-rows: 60px minmax(0, 1fr);
+}
+
+.app-topbar,
+.detail-topbar {
+	height: 60px;
+	padding: 0 var(--page-pad);
+	gap: var(--space-5);
+}
+
+.customer-nav {
+	padding: var(--space-4) var(--space-3);
+}
+
+.nav-item {
+	min-height: 40px;
+	padding: 0 var(--space-3);
+	font-size: 14px;
+}
+
+.nav-item svg {
+	width: 18px;
+	height: 18px;
+}
+
+.icon-button,
+.admin-icon-btn {
+	width: 36px;
+	height: 36px;
+}
+
+.admin-topbar {
+	height: 52px;
+	padding: 0 var(--page-pad);
+	gap: var(--space-4);
+}
+
+.admin-brand {
+	min-width: 136px;
+}
+
+.admin-brand-mark,
+.admin-avatar {
+	width: 32px;
+	height: 32px;
+}
+
+.admin-section-label {
+	padding-left: var(--space-4);
+}
+
+.admin-nav a {
+	min-height: 32px;
+	padding: 0 var(--space-3);
+	font-size: 13px;
+}
+
+.admin-btn,
+.flow-button,
+.btn-secondary,
+.btn-quiet,
+.new-booking-button,
+.favourite-actions .btn-quiet,
+.favourite-actions .btn-secondary {
+	min-height: 38px;
+	padding: 0 var(--space-4);
+	font-size: 14px;
+}
+
+.admin-page,
+.fleet-page,
+.bookings-page,
+.favourites-page,
+.customer-flow-page,
+.profile-page,
+.detail-page {
+	width: min(100%, var(--page-max));
+	max-width: var(--page-max);
+	padding: var(--space-5) var(--page-pad) var(--space-8);
+}
+
+.admin-page-header,
+.page-header,
+.bookings-head,
+.favourites-head,
+.flow-header,
+.content-head {
+	margin-bottom: var(--space-5);
+	gap: var(--space-4);
+}
+
+.admin-page-header h1,
+.page-header h1,
+.bookings-head h1,
+.favourites-head h1,
+.flow-header h1,
+.content-head h1,
+.car-summary h1 {
+	font-size: clamp(24px, 2.2vw, 30px);
+	line-height: 1.12;
+	font-weight: 650;
+}
+
+.admin-page-header p,
+.bookings-head p,
+.favourites-head p,
+.flow-header p,
+.subhead {
+	font-size: 15px;
+}
+
+.admin-stats-grid,
+.dashboard-stat-grid,
+.booking-stats,
+.stats-grid {
+	gap: var(--space-3);
+	margin-bottom: var(--space-5);
+}
+
+.admin-stat-card,
+.dashboard-stat-card,
+.booking-stats article,
+.stat-card {
+	min-height: 96px;
+	padding: var(--space-4);
+	border-radius: var(--radius-md);
+}
+
+.admin-stat-card strong,
+.dashboard-stat-card strong,
+.booking-stats strong,
+.stat-card p {
+	margin-top: var(--space-2);
+	font-size: clamp(24px, 2.4vw, 30px);
+}
+
+.dashboard-stat-card svg {
+	width: 28px;
+	height: 28px;
+	right: var(--space-4);
+	bottom: var(--space-4);
+}
+
+.admin-filters,
+.filters-bar {
+	gap: var(--space-3);
+	padding: var(--space-3);
+	margin-bottom: var(--space-5);
+	border-radius: var(--radius-md);
+}
+
+.admin-input,
+.admin-select,
+.admin-textarea,
+.flow-input,
+.flow-select,
+.flow-textarea,
+.filter-search input,
+.filter-group select,
+.sort-pill select,
+.range-grid input,
+.search-input,
+.booking-card input {
+	min-height: 40px;
+	height: 40px;
+	border-radius: var(--radius-sm);
+	font-size: 14px;
+}
+
+.admin-textarea,
+.flow-textarea {
+	min-height: 96px;
+}
+
+.admin-chip,
+.booking-tabs button,
+.favourite-filters button,
+.segmented.compact label {
+	min-height: 34px;
+	height: 34px;
+	padding: 0 var(--space-3);
+	font-size: 13px;
+}
+
+.admin-panel-header,
+.admin-table th,
+.admin-table td {
+	padding: var(--space-3) var(--space-4);
+}
+
+.admin-panel-title,
+.dashboard-panel-head h2,
+.flow-section-title,
+.detail-section h2,
+.includes-card h2 {
+	font-size: 17px;
+}
+
+.admin-table {
+	min-width: 700px;
+}
+
+.admin-table th {
+	font-size: 12px;
+}
+
+.admin-table td {
+	font-size: 14px;
+}
+
+.status-pill,
+.booking-status,
+.flow-pill,
+.flow-badge,
+.duration-chip,
+.availability-badge {
+	min-height: 24px;
+	padding: 0 var(--space-2);
+	font-size: 12px;
+}
+
+.dashboard-showcase {
+	gap: var(--space-4);
+}
+
+.dashboard-panel,
+.chart-panel,
+.flow-card,
+.profile-card,
+.profile-section,
+.booking-card,
+.includes-card,
+.review-card {
+	padding: var(--space-4);
+	border-radius: var(--radius-md);
+}
+
+.dashboard-panel-head {
+	margin-bottom: var(--space-4);
+}
+
+.dashboard-line {
+	max-height: 180px;
+}
+
+.vehicles-page {
+	grid-template-columns: 264px minmax(0, 1fr);
+}
+
+.filter-panel {
+	padding: var(--space-4);
+	gap: var(--space-4);
+}
+
+.filter-head h2 {
+	font-size: 18px;
+}
+
+.filter-search,
+.filter-group {
+	gap: var(--space-2);
+	padding-bottom: var(--space-4);
+}
+
+.vehicles-content {
+	padding: var(--space-5) var(--page-pad) var(--space-8);
+}
+
+.vehicle-grid,
+#fleet-grid,
+.favourites-grid {
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: var(--space-4);
+}
+
+.vehicle-card,
+.favourite-card,
+.admin-panel,
+.dashboard-panel,
+.dashboard-stat-card,
+.admin-stat-card,
+.booking-card-row,
+.flow-card,
+.profile-card,
+.profile-nav,
+.profile-section,
+.detail-gallery,
+.booking-card,
+.includes-card,
+.review-card {
+	border-radius: var(--radius-md);
+}
+
+.vehicle-media,
+.favourite-media {
+	aspect-ratio: 16 / 9;
+	height: auto;
+	padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.vehicle-body,
+.favourite-body {
+	padding: var(--space-4);
+	gap: var(--space-2);
+}
+
+.vehicle-title-row h2,
+.vehicle-name,
+.favourite-body h2 {
+	font-size: 17px;
+}
+
+.vehicle-price,
+.favourite-price-row strong {
+	font-size: 18px;
+}
+
+.bookings-head,
+.favourites-head {
+	align-items: center;
+}
+
+.booking-stats article {
+	align-content: start;
+}
+
+.booking-tabs,
+.favourite-filters {
+	margin-bottom: var(--space-5);
+}
+
+.booking-tabs button {
+	min-width: 92px;
+}
+
+.booking-list {
+	gap: var(--space-4);
+}
+
+.booking-card-row {
+	padding: var(--space-4);
+	grid-template-columns: minmax(0, 1fr) 184px;
+	gap: var(--space-4);
+}
+
+.booking-card-main {
+	grid-template-columns: 132px minmax(0, 1fr);
+	gap: var(--space-4);
+}
+
+.booking-info h2 {
+	font-size: 20px;
+}
+
+.booking-side {
+	min-width: 0;
+}
+
+.booking-card-bottom {
+	padding-top: var(--space-4);
+}
+
+.profile-page {
+	grid-template-columns: 280px minmax(0, 1fr);
+	gap: var(--space-4);
+}
+
+.profile-avatar {
+	width: 60px;
+	height: 60px;
+	font-size: 18px;
+}
+
+.profile-grid,
+.license-card {
+	gap: var(--space-4);
+}
+
+.detail-layout {
+	grid-template-columns: minmax(0, 1fr) 320px;
+	gap: var(--space-5);
+}
+
+.gallery-stage {
+	min-height: 280px;
+	padding: var(--space-6);
+}
+
+.gallery-stage img {
+	max-height: 260px;
+}
+
+.spec-grid {
+	gap: var(--space-2);
+}
+
+.spec-card {
+	min-height: 72px;
+	padding: var(--space-3);
+}
+
+.spec-card strong {
+	font-size: 16px;
+}
+
+.booking-price strong {
+	font-size: 26px;
+}
+
+.book-now,
+.btn-primary {
+	min-height: 48px;
+	height: 48px;
+	font-size: 15px;
+}
+
+.auth-shell {
+	grid-template-columns: minmax(460px, 1fr) minmax(392px, 500px);
+}
+
+.auth-showcase {
+	padding: var(--space-6);
+}
+
+.auth-showcase-title {
+	font-size: clamp(36px, 4vw, 46px);
+}
+
+.auth-showcase-copy {
+	font-size: 16px;
+}
+
+.auth-proof {
+	padding: var(--space-3);
+}
+
+.auth-proof strong {
+	font-size: 20px;
+}
+
+.card-header {
+	padding: var(--space-6) var(--space-6) var(--space-4);
+}
+
+.auth-shell .card-body {
+	padding: var(--space-4) var(--space-6) var(--space-6);
+}
+
+.headline {
+	font-size: 32px;
+}
+
+.input-shell {
+	height: 46px;
+}
+
+.landing-copy h1 {
+	font-size: clamp(52px, 6vw, 76px);
+}
+
+.landing-copy p {
+	font-size: 18px;
+}
+
+.landing-primary,
+.landing-secondary {
+	min-height: 48px;
+	font-size: 16px;
+}
+
+.landing-stat strong {
+	font-size: 28px;
+}
+
+@media (max-width: 1100px) {
+	.app-shell {
+		grid-template-columns: 68px minmax(0, 1fr);
+	}
+
+	.dashboard-stat-grid,
+	.booking-stats,
+	.stats-grid,
+	.admin-stats-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.dashboard-showcase,
+	.flow-grid,
+	.detail-layout,
+	.profile-page {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 760px) {
+	.app-shell {
+		grid-template-rows: 56px auto minmax(0, 1fr);
+	}
+
+	.app-topbar,
+	.detail-topbar {
+		height: 56px;
+	}
+
+	.admin-topbar {
+		height: auto;
+		min-height: 56px;
+		flex-wrap: wrap;
+		padding-block: var(--space-2);
+	}
+
+	.admin-page,
+	.fleet-page,
+	.bookings-page,
+	.favourites-page,
+	.customer-flow-page,
+	.profile-page,
+	.detail-page,
+	.vehicles-content {
+		padding: var(--space-4);
+	}
+
+	.admin-page-header,
+	.page-header,
+	.bookings-head,
+	.favourites-head,
+	.flow-header,
+	.content-head {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.admin-actions,
+	.flow-actions,
+	.booking-actions,
+	.favourite-actions,
+	.landing-cta-row {
+		width: 100%;
+	}
+
+	.admin-actions > *,
+	.flow-actions > *,
+	.booking-actions > *,
+	.favourite-actions > *,
+	.new-booking-button {
+		flex: 1 1 auto;
+	}
+
+	.vehicles-page {
+		grid-template-columns: 1fr;
+	}
+
+	.vehicle-grid,
+	#fleet-grid,
+	.favourites-grid,
+	.dashboard-stat-grid,
+	.booking-stats,
+	.stats-grid,
+	.admin-stats-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.booking-card-row,
+	.booking-card-main,
+	.booking-card-bottom,
+	.flow-car-strip,
+	.waitlist-item {
+		grid-template-columns: 1fr;
+	}
+
+	.booking-side {
+		align-items: flex-start;
+	}
+
+	.booking-actions,
+	.favourite-actions {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.spec-grid,
+	.profile-grid,
+	.license-card,
+	.form-row {
+		grid-template-columns: 1fr;
+	}
+
+	.auth-shell {
+		padding: var(--space-4);
+	}
+
+	.auth-shell .card-header,
+	.auth-shell .card-body {
+		padding: var(--space-4);
+	}
+
+	.auth-shell .segmented {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-1);
+	}
+
+	.landing-copy {
+		padding: var(--space-8) var(--space-4);
+	}
+
+	.landing-copy h1 {
+		font-size: 44px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 1ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 1ms !important;
+	}
+}

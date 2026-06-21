@@ -1,7 +1,7 @@
 .auth-shell {
 	min-height: 100vh;
 	display: grid;
-	grid-template-columns: minmax(560px, 1fr) minmax(460px, 580px);
+	grid-template-columns: minmax(460px, 1fr) minmax(392px, 500px);
 	align-items: stretch;
 	padding: 0;
 	background:
@@ -14,6 +14,6 @@
 	.auth-shell {
 		grid-template-columns: 1fr;
 		gap: var(--space-4);
-		padding: var(--space-5);
+		padding: var(--space-4);
 	}
 }

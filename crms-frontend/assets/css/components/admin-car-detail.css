@@ -599,3 +599,69 @@ dialog.confirm-modal::backdrop {
   .form-row { grid-template-columns: 1fr; }
   .detail-meta h1 { font-size: 22px; }
 }
+
+/* Small alignment pass for the admin detail page. */
+.detail-page {
+  max-width: 1120px;
+  margin: var(--space-5) auto;
+  padding: 0 var(--page-pad, 24px) var(--space-8);
+}
+
+.btn-back {
+  margin-bottom: var(--space-4);
+}
+
+.detail-hero {
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+}
+
+.detail-media {
+  flex-basis: 320px;
+  min-height: 200px;
+  border-radius: var(--radius-sm);
+}
+
+.detail-media img {
+  height: 220px;
+}
+
+.detail-meta {
+  gap: var(--space-3);
+}
+
+.detail-meta h1 {
+  font-size: clamp(24px, 2.2vw, 30px);
+  letter-spacing: 0;
+}
+
+.detail-grid {
+  gap: var(--space-3);
+}
+
+.detail-stat,
+.detail-description,
+dialog#car-edit-modal,
+dialog.confirm-modal {
+  border-radius: var(--radius-md);
+}
+
+.detail-stat {
+  padding: var(--space-4);
+}
+
+.detail-stat-value {
+  font-size: 22px;
+}
+
+dialog#car-edit-modal,
+dialog.confirm-modal {
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .detail-media {
+    flex-basis: auto;
+  }
+}

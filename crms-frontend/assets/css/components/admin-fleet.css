@@ -1081,3 +1081,168 @@ dialog#add-vehicle-modal::backdrop {
         font-size: 13px;
     }
 }
+
+/* Keep the fleet-only stylesheet aligned with the shared refinement scale. */
+.fleet-page {
+    max-width: var(--page-max, 1280px);
+    padding: var(--space-5) var(--page-pad, clamp(16px, 2.4vw, 32px)) var(--space-8);
+}
+
+.page-header {
+    margin-bottom: var(--space-5);
+}
+
+.page-header h1 {
+    font-size: clamp(24px, 2.2vw, 30px);
+}
+
+.btn-add-vehicle,
+.btn-card-outline,
+.btn-card-primary,
+.btn-cancel,
+.btn-submit {
+    border-radius: var(--radius-sm);
+}
+
+.btn-add-vehicle {
+    height: 38px;
+    padding: 0 var(--space-4);
+    background: var(--brand-dark);
+    color: var(--brand-light);
+}
+
+.stats-grid {
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+}
+
+.stat-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+}
+
+.stat-card p {
+    font-size: clamp(24px, 2.4vw, 30px);
+}
+
+.filters-bar {
+    padding: var(--space-3);
+    margin-bottom: var(--space-5);
+    border-radius: var(--radius-md);
+}
+
+.search-input {
+    height: 40px;
+    border-radius: var(--radius-sm);
+}
+
+#fleet-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-4);
+}
+
+.vehicle-card {
+    border-radius: var(--radius-md);
+    box-shadow: none;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-2px);
+    box-shadow: none;
+    border-color: hsl(220 8% 68%);
+}
+
+.vehicle-media {
+    aspect-ratio: 16 / 9;
+    padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.vehicle-body {
+    padding: var(--space-4);
+    gap: var(--space-2);
+}
+
+.vehicle-name {
+    font-size: 17px;
+}
+
+.vehicle-footer {
+    margin-top: var(--space-2);
+}
+
+.btn-card-outline,
+.btn-card-primary {
+    height: 34px;
+    color: var(--text-primary);
+}
+
+.btn-card-primary,
+.btn-submit,
+.btn-change-image {
+    background: var(--brand-dark);
+    color: var(--brand-light);
+}
+
+.nav-link.active {
+    background: var(--brand-dark) !important;
+    color: var(--brand-light) !important;
+}
+
+.card-badge.available,
+.card-badge.rented {
+    background: var(--brand-dark);
+    color: var(--brand-light);
+}
+
+.card-badge.maintenance {
+    background: hsl(38 74% 42%);
+    color: hsl(40 20% 96%);
+}
+
+.card-seats {
+    color: var(--text-primary);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    border-color: var(--text-primary);
+}
+
+dialog#add-vehicle-modal,
+.vehicle-detail-modal {
+    border-radius: var(--radius-md);
+    box-shadow: none;
+}
+
+.vehicle-detail-shell {
+    padding: var(--space-5);
+    gap: var(--space-5);
+}
+
+.vehicle-detail-header {
+    grid-template-columns: 240px minmax(0, 1fr) auto;
+    gap: var(--space-5);
+}
+
+.vehicle-detail-title h2 {
+    font-size: clamp(22px, 2.4vw, 30px);
+}
+
+.vehicle-detail-title p {
+    font-size: 17px;
+}
+
+.vehicle-detail-grid {
+    gap: var(--space-4);
+}
+
+@media (max-width: 760px) {
+    .fleet-page {
+        padding: var(--space-4);
+    }
+
+    .vehicle-detail-header,
+    .vehicle-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
